@@ -1,5 +1,9 @@
 Revision history for Perl extension Math::Int128.
 
+0.02
+      - on string to int128 conversion skip zeros at the left before
+        testing for overflow
+
 0.01  Mon Feb  7 11:14:56 2011
 	- original version; created by h2xs 1.23 with options
 		-An Math::Int128
