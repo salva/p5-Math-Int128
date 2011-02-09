@@ -118,6 +118,9 @@ int128_t
 atou128(pTHX_ SV *sv) {
     STRLEN len;
     const char *pv = SvPV_const(sv, len);
+    if (len && (*pv == '+')) {
+        pv++; len--;
+    }
     skip_zeros;
     if ((len >= 39) && (strncmp(pv, "340282366920938463463374607431768211456", len) >= 0))
         Perl_croak(aTHX_ "Integer overflow in conversion to uint128_t");
@@ -128,21 +131,26 @@ int128_t
 atoi128(pTHX_ SV *sv) {
     STRLEN len;
     const char *pv = SvPV_const(sv, len);
-    if (len && (*pv == '-')) {
-        pv++; len--;
-        skip_zeros;
-        if (len >= 39) {
-            int cmp = strncmp(pv, "170141183460469231731687303715884105728", len);
-            if (cmp == 0)
-                return (((int128_t)1) << 127);
-            if (cmp > 0)
-                Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
+    if (len) {
+        if (*pv == '+') {
+            pv++; len--;
         }
-        return -atoa128(aTHX_ pv, len, "int128_t");
+        else if (*pv == '-') {
+            pv++; len--;
+            skip_zeros;
+            if (len >= 39) {
+                int cmp = strncmp(pv, "170141183460469231731687303715884105728", len);
+                if (cmp == 0)
+                    return (((int128_t)1) << 127);
+                if (cmp > 0)
+                    Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
+            }
+            return -atoa128(aTHX_ pv, len, "int128_t");
+        }
+        skip_zeros;
+        if ((len >= 39) && (strncmp(pv, "170141183460469231731687303715884105728", len) >= 0))
+            Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
     }
-    skip_zeros;
-    if ((len >= 39) && (strncmp(pv, "170141183460469231731687303715884105728", len) >= 0))
-        Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
     return atoa128(aTHX_ pv, len, "int128_t");
 }
 
