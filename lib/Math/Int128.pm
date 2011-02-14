@@ -29,7 +29,8 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128 )],
                                    uint128_to_net
                                    native_to_uint128
                                    uint128_to_native )],
-                     op    => [qw( int128_add
+                     op    => [qw( int128_set
+                                   int128_add
                                    int128_sub
                                    int128_mul
                                    int128_div
@@ -42,6 +43,7 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128 )],
                                    int128_xor
                                    int128_left
                                    int128_right
+                                   uint128_set
                                    uint128_add
                                    uint128_sub
                                    uint128_mul

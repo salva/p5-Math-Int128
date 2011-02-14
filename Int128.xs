@@ -95,21 +95,46 @@ SvSU128(pTHX_ SV *sv) {
 #define SvI128x(sv) SvI128Y(SvSI128(aTHX_ sv))
 #define SvU128x(sv) SvI128Y(SvSU128(aTHX_ sv))
 
+static const U32 my_pow10[] = { 1,
+                                10,
+                                100,
+                                1000,
+                                10000,
+                                100000,
+                                1000000,
+                                10000000,
+                                100000000,
+                                1000000000 };
+
 uint128_t
 atoa128(pTHX_ const char *pv, STRLEN len, char *type) {
     uint128_t u128 = 0;
     STRLEN i;
-    for (i = 0; i < len; i++) {
-        char c = pv[i];
-        if ((c >= '0') && (c <= '9')) {
-            u128 = u128 * 10 + (c - '0');
-        }
-        else break;
+
+    if (len == 0) {
+        if (ckWARN(WARN_NUMERIC))
+            Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
+                        "Argument isn't numeric in conversion to %s", type);
+        return 0;
     }
-    if ((!len || (i < len)) && ckWARN(WARN_NUMERIC))
-        Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
-                    "Argument isn't numeric in conversion to %s", type);
-    return u128;
+
+    while (1) {
+        U32 acu32 = 0;
+        for (i = 0; i < 9; i++) {
+            U32 c = *(pv++);
+            if ((c >= '0') && (c <= '9'))
+                acu32 = acu32 * 10 + (c - '0');
+            else {
+                if (ckWARN(WARN_NUMERIC) && (len != i))
+                    Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
+                                "Argument isn't numeric in conversion to %s", type);
+                return u128 * my_pow10[i] + acu32;
+            }
+        }
+        u128 *= 1000000000;
+        u128 += acu32;
+        len -= 9;
+    }
 }
 
 #define skip_zeros for(;len > 1 && *pv == '0'; pv++, len--);
@@ -1354,6 +1379,13 @@ MODULE = Math::Int128		PACKAGE = Math::Int128		PREFIX=mi128_
 PROTOTYPES: DISABLE
 
 void
+mi128_int128_set(self, a=NULL)
+    SV *self
+    SV *a
+CODE:
+    SvI128x(self) = (a ? SvI128(aTHX_ a) : 0);
+
+void
 mi128_int128_add(self, a, b)
     SV *self
     SV *a
@@ -1466,6 +1498,13 @@ CODE:
 
 MODULE = Math::Int128		PACKAGE = Math::Int128		PREFIX=mu128_
 PROTOTYPES: DISABLE
+
+void
+mu128_uint128_set(self, a=NULL)
+    SV *self
+    SV *a
+CODE:
+    SvU128x(self) = (a ? SvU128(aTHX_ a) : 0);
 
 void
 mu128_uint128_add(self, a, b)
