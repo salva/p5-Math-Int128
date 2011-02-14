@@ -42,7 +42,7 @@ $i_2 *= $i_2;
 $mpz1 *= $mpz1;
 $mpz2 *= $mpz2;
 
-print "i_1: $i_1, i_2: $i_2\n";
+# print "i_1: $i_1, i_2: $i_2\n";
 
 
 print "

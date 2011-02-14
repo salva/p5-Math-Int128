@@ -181,13 +181,9 @@ atoi128(pTHX_ SV *sv) {
 
 int128_t
 SvI128(pTHX_ SV *sv) {
-    if (!SvOK(sv)) {
-        return 0;
-    }
-    if (SvIOK_UV(sv)) {
-        return SvUV(sv);
-    }
     if (SvIOK(sv)) {
+        if (SvIOK_UV(sv))
+            return SvUV(sv);
         return SvIV(sv);
     }
     if (SvNOK(sv)) {
@@ -205,13 +201,9 @@ SvI128(pTHX_ SV *sv) {
 
 uint128_t
 SvU128(pTHX_ SV *sv) {
-    if (!SvOK(sv)) {
-        return 0;
-    }
-    if (SvIOK_UV(sv)) {
-        return SvUV(sv);
-    }
     if (SvIOK(sv)) {
+        if (SvIOK_UV(sv))
+            return SvUV(sv);
         return SvIV(sv);
     }
     if (SvNOK(sv)) {
