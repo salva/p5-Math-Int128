@@ -22,7 +22,8 @@ typedef unsigned __int128 uint128_t;
 #define SvI128Y(sv) (*((int128_t*)SvPVX(sv)))
 #define SVt_I128 SVt_PV
 
-SV *new_si128(pTHX) {
+static SV *
+new_si128(pTHX) {
     SV *si128 = newSV(I128LEN);
     SvPOK_on(si128);
     SvCUR_set(si128, I128LEN);
@@ -31,7 +32,7 @@ SV *new_si128(pTHX) {
 
 #define new_su128 new_si128
 
-int
+static int
 SvI128OK(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
@@ -40,7 +41,7 @@ SvI128OK(pTHX_ SV *sv) {
     return 0;
 }
 
-int
+static int
 SvU128OK(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
@@ -49,7 +50,7 @@ SvU128OK(pTHX_ SV *sv) {
     return 0;
 }
 
-SV *
+static SV *
 newSVi128(pTHX_ int128_t i128) {
     SV *sv;
     SV *si128 = new_si128(aTHX);
@@ -59,7 +60,7 @@ newSVi128(pTHX_ int128_t i128) {
     return sv;
 }
 
-SV *
+static SV *
 newSVu128(pTHX_ uint128_t u128) {
     SV *sv;
     SV *su128 = new_su128(aTHX);
@@ -72,7 +73,7 @@ newSVu128(pTHX_ uint128_t u128) {
 #define SvI128X(sv) (SvI128Y(SvRV(sv)))
 #define SvU128X(sv) (SvI128Y(SvRV(sv)))
 
-SV *
+static SV *
 SvSI128(pTHX_ SV *sv) {
     if (SvRV(sv)) {
         SV *si128 = SvRV(sv);
@@ -82,7 +83,7 @@ SvSI128(pTHX_ SV *sv) {
     Perl_croak(aTHX_ "internal error: reference to int128_t expected");
 }
 
-SV *
+static SV *
 SvSU128(pTHX_ SV *sv) {
     if (SvRV(sv)) {
         SV *su128 = SvRV(sv);
@@ -106,8 +107,8 @@ static const U32 my_pow10[] = { 1,
                                 100000000,
                                 1000000000 };
 
-uint128_t
-atoa128(pTHX_ const char *pv, STRLEN len, char *type) {
+static uint128_t
+atoui128(pTHX_ const char *pv, STRLEN len, char *type) {
     uint128_t u128 = 0;
     STRLEN i;
 
@@ -139,7 +140,7 @@ atoa128(pTHX_ const char *pv, STRLEN len, char *type) {
 
 #define skip_zeros for(;len > 1 && *pv == '0'; pv++, len--);
 
-int128_t
+static int128_t
 atou128(pTHX_ SV *sv) {
     STRLEN len;
     const char *pv = SvPV_const(sv, len);
@@ -149,10 +150,10 @@ atou128(pTHX_ SV *sv) {
     skip_zeros;
     if ((len >= 39) && (strncmp(pv, "340282366920938463463374607431768211456", len) >= 0))
         Perl_croak(aTHX_ "Integer overflow in conversion to uint128_t");
-    return atoa128(aTHX_ pv, len, "uint128_t");
+    return atoui128(aTHX_ pv, len, "uint128_t");
 }
 
-int128_t
+static int128_t
 atoi128(pTHX_ SV *sv) {
     STRLEN len;
     const char *pv = SvPV_const(sv, len);
@@ -170,16 +171,16 @@ atoi128(pTHX_ SV *sv) {
                 if (cmp > 0)
                     Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
             }
-            return -atoa128(aTHX_ pv, len, "int128_t");
+            return -atoui128(aTHX_ pv, len, "int128_t");
         }
         skip_zeros;
         if ((len >= 39) && (strncmp(pv, "170141183460469231731687303715884105728", len) >= 0))
             Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
     }
-    return atoa128(aTHX_ pv, len, "int128_t");
+    return atoui128(aTHX_ pv, len, "int128_t");
 }
 
-int128_t
+static int128_t
 SvI128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
@@ -200,7 +201,7 @@ SvI128(pTHX_ SV *sv) {
     return atoi128(aTHX_ sv);
 }
 
-uint128_t
+static uint128_t
 SvU128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
@@ -219,7 +220,7 @@ SvU128(pTHX_ SV *sv) {
     return atou128(aTHX_ sv);
 }
 
-SV *
+static SV *
 si128_to_number(pTHX_ SV *sv) {
     int128_t i128 = SvI128(aTHX_ sv);
     if (i128 < 0) {
@@ -235,7 +236,7 @@ si128_to_number(pTHX_ SV *sv) {
     return newSVnv(i128);
 }
 
-SV *
+static SV *
 su128_to_number(pTHX_ SV *sv) {
     uint128_t u128 = SvU128(aTHX_ sv);
     UV uv;
@@ -247,7 +248,7 @@ su128_to_number(pTHX_ SV *sv) {
 
 #define I128STRLEN 44
 
-STRLEN
+static STRLEN
 u128_to_string(uint128_t u128, char *to) {
     char str[I128STRLEN];
     int i, len = 0;
@@ -265,7 +266,7 @@ u128_to_string(uint128_t u128, char *to) {
     }
 }
 
-STRLEN
+static STRLEN
 i128_to_string(int128_t i128, char *to) {
     if (i128 < 0) {
         *(to++) = '-';
@@ -274,6 +275,7 @@ i128_to_string(int128_t i128, char *to) {
     return u128_to_string(i128, to);
 }
 
+static void
 u128_to_hex(uint128_t i128, char *to) {
     int i = I128LEN * 2;
     while (i--) {
