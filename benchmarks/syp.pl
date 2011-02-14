@@ -26,7 +26,7 @@ print "
 **MULTIPLICATION**
 ******************\n\n";
 
-cmpthese(-1, {
+cmpthese(-2, {
     'mul_M::I' => '$ri = Math::Int128::_mul($i_1, $i_2, 0)',
     'mul_M::I2'=> 'int128_mul($i_ret, $i_1, $i_2)',
     'mul_M::G1'=> '$mpz_ret = $mpz1 * $mpz2',
@@ -50,7 +50,7 @@ print "
 *****DIVISION*****
 ******************\n\n";
 
-cmpthese(-1, {
+cmpthese(-2, {
     'div_M::I' => '$ri = Math::Int128::_div($i_1, $i_div, 0)',
     'div_M::I2'=> 'int128_div($i_ret, $i_1, $i_div)',
     'div_M::G1'=>'$mpz_ret = $mpz1 / $mpz_div',
@@ -65,7 +65,7 @@ print"
 *****ADDITION*****
 ******************\n\n";
 
-cmpthese(-1, {
+cmpthese(-2, {
     'add_M::I'  => '$ri = Math::Int128::_add($i_1, $i_2, 0)',
     'add_M::I2' => 'int128_add($i_ret, $i_1, $i_2)',
     'add_M::G1' => '$mpz_ret = $mpz1  + $mpz2',
@@ -80,7 +80,7 @@ print "
 ****SUBTRACTION***
 ******************\n\n";
 
-cmpthese(-1, {
+cmpthese(-2, {
     'sub_M::I'  => '$ri = Math::Int128::_sub($i_1, $i_sub, 0)',
     'sub_M::I2' => 'int128_sub($i_ret, $i_1, $i_sub)',
     'sub_M::G1' => '$mpz_ret = $mpz1 - $mpz_sub',

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    our $VERSION = '0.01';
+    our $VERSION = '0.02';
 
     require XSLoader;
     XSLoader::load('Math::Int128', $VERSION);
@@ -203,6 +203,10 @@ C<int128_divmod> returns both the result of the division and the remainder:
   my $ret = int128();
   my $rem = int128();
   int128_divmod($ret, $rem, $a, $b);
+
+=head1 SEE ALSO
+
+L<http://perlmonks.org/?node_id=886488>.
 
 =head1 COPYRIGHT AND LICENSE
 
