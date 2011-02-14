@@ -181,19 +181,20 @@ atoi128(pTHX_ SV *sv) {
 
 int128_t
 SvI128(pTHX_ SV *sv) {
-    if (SvIOK(sv)) {
-        if (SvIOK_UV(sv))
-            return SvUV(sv);
-        return SvIV(sv);
-    }
-    if (SvNOK(sv)) {
-        return SvNV(sv);
-    }
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
-        if (si128 && SvPOK(si128) && (SvCUR(si128) == I128LEN) &&
-            (sv_isa(sv, "Math::Int128") || sv_isa(sv, "Math::UInt128"))) {
+        if (SvPOK(si128) && (SvCUR(si128) == I128LEN) &&
+            (sv_isa(sv, "Math::Int128") || sv_isa(sv, "Math::UInt128")))
             return SvI128Y(si128);
+    }
+    else {
+        if (SvIOK(sv)) {
+            if (SvIOK_UV(sv))
+                return SvUV(sv);
+            return SvIV(sv);
+        }
+        if (SvNOK(sv)) {
+            return SvNV(sv);
         }
     }
     return atoi128(aTHX_ sv);
@@ -201,20 +202,19 @@ SvI128(pTHX_ SV *sv) {
 
 uint128_t
 SvU128(pTHX_ SV *sv) {
-    if (SvIOK(sv)) {
-        if (SvIOK_UV(sv))
-            return SvUV(sv);
-        return SvIV(sv);
-    }
-    if (SvNOK(sv)) {
-        return SvNV(sv);
-    }
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
-        if (su128 && SvPOK(su128) && (SvCUR(su128) == I128LEN) &&
-            (sv_isa(sv, "Math::Int128") || sv_isa(sv, "Math::UInt128"))) {
+        if (SvPOK(su128) && (SvCUR(su128) == I128LEN) &&
+            (sv_isa(sv, "Math::UInt128") || sv_isa(sv, "Math::Int128")))
             return SvI128Y(su128);
+    }
+    else {
+        if (SvIOK(sv)) {
+            if (SvIOK_UV(sv))
+                return SvUV(sv);
+            return SvIV(sv);
         }
+        if (SvNOK(sv)) return SvNV(sv);
     }
     return atou128(aTHX_ sv);
 }
