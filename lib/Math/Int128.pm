@@ -15,18 +15,48 @@ BEGIN {
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(int128
-                    int128_to_number
-                    int128_to_hex
-                    net_to_int128 int128_to_net
-                    native_to_int128 int128_to_native
-                    uint128
-                    uint128_to_number
-                    uint128_to_hex
-                    net_to_uint128 uint128_to_net
-                    native_to_uint128 uint128_to_native);
 
-*int128_to_hex = \&uint128_to_hex;
+our %EXPORT_TAGS = ( ctors => [qw( int128 uint128 )],
+                     pack  => [qw( int128_to_number
+                                   int128_to_hex
+                                   net_to_int128
+                                   int128_to_net
+                                   native_to_int128
+                                   int128_to_native
+                                   uint128_to_number
+                                   uint128_to_hex
+                                   net_to_uint128
+                                   uint128_to_net
+                                   native_to_uint128
+                                   uint128_to_native )],
+                     op    => [qw( int128_add
+                                   int128_sub
+                                   int128_mul
+                                   int128_div
+                                   int128_mod
+                                   int128_divmod
+                                   int128_neg
+                                   int128_not
+                                   int128_and
+                                   int128_or
+                                   int128_xor
+                                   int128_left
+                                   int128_right
+                                   uint128_add
+                                   uint128_sub
+                                   uint128_mul
+                                   uint128_div
+                                   uint128_mod
+                                   uint128_divmod
+                                   uint128_not
+                                   uint128_and
+                                   uint128_or
+                                   uint128_xor
+                                   uint128_left
+                                   uint128_right )] );
+
+our @EXPORT_OK = map @$_, values %EXPORT_TAGS;
+
 
 use overload ( '+' => \&_add,
                '+=' => \&_add,
@@ -142,7 +172,35 @@ Then, to compile Math::Int128
 =head1 API
 
 See L<Math::Int64>. This module provides a similar set of functions,
-just S<s/64/128/>.
+just C<s/64/128/>.
+
+Besides that, as object allocation and destruction has been found to
+be a bottleneck, an alternative set of operations that use their first
+argument as the output (instead of the return value) is also
+provided.
+
+They are...
+
+  int128_add, int128_sub mul int128_div int128_mod int128_divmod
+  int128_and int128_or int128_xor int128_left int128_right int128_not
+  int128_neg
+
+and the corresponding C<uint128> versions.
+
+For instance:
+
+  my $a = int128("1299472960684039584764953");
+  my $b = int128("-2849503498690387383748");
+  my $ret = int128();
+  int128_mul($ret, $a, $b);
+  int128_add($ret, $ret, "12826738463");
+  say $ret;
+
+C<int128_divmod> returns both the result of the division and the remainder:
+
+  my $ret = int128();
+  my $rem = int128();
+  int128_divmod($ret, $rem, $a, $b);
 
 =head1 COPYRIGHT AND LICENSE
 

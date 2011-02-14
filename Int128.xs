@@ -273,18 +273,18 @@ package_int128_stash = gv_stashsv(newSVpv("Math::Int128", 0), 1);
 package_uint128_stash = gv_stashsv(newSVpv("Math::UInt128", 0), 1);
 
 SV *
-miu128_int128(value=&PL_sv_undef)
+miu128_int128(value=0)
     SV *value;
 CODE:
-    RETVAL = newSVi128(aTHX_ SvI128(aTHX_ value));
+    RETVAL = newSVi128(aTHX_ (value ? SvI128(aTHX_ value) : 0));
 OUTPUT:
     RETVAL
 
 SV *
-miu128_uint128(value=&PL_sv_undef)
+miu128_uint128(value=0)
     SV *value;
 CODE:
-    RETVAL = newSVu128(aTHX_ SvU128(aTHX_ value));
+    RETVAL = newSVu128(aTHX_ (value ? SvU128(aTHX_ value) : 0));
 OUTPUT:
     RETVAL
 
@@ -464,6 +464,21 @@ miu128_uint128_to_hex(self)
 PREINIT:
     char *pv;
     uint128_t u128 = SvU128(aTHX_ self);
+CODE:
+    RETVAL = newSV(I128LEN * 2);
+    SvPOK_on(RETVAL);
+    SvCUR_set(RETVAL, I128LEN * 2);
+    pv = SvPVX(RETVAL);
+    u128_to_hex(u128, pv);
+OUTPUT:
+    RETVAL
+
+SV *
+miu128_int128_to_hex(self)
+    SV *self
+PREINIT:
+    char *pv;
+    uint128_t u128 = SvI128(aTHX_ self);
 CODE:
     RETVAL = newSV(I128LEN * 2);
     SvPOK_on(RETVAL);
@@ -1333,3 +1348,231 @@ CODE:
     SvCUR_set(RETVAL, u128_to_string(SvU128x(self), SvPVX(RETVAL)));
 OUTPUT:
     RETVAL
+
+
+MODULE = Math::Int128		PACKAGE = Math::Int128		PREFIX=mi128_
+PROTOTYPES: DISABLE
+
+void
+mi128_int128_add(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvI128x(self) = SvI128(aTHX_ a) + SvI128(aTHX_ b);
+
+void
+mi128_int128_sub(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvI128x(self) = SvI128(aTHX_ a) - SvI128(aTHX_ b);
+
+void
+mi128_int128_mul(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvI128x(self) = SvI128(aTHX_ a) * SvI128(aTHX_ b);
+
+void
+mi128_int128_div(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvI128x(self) = SvI128(aTHX_ a) / SvI128(aTHX_ b);
+
+void
+mi128_int128_mod(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvI128x(self) = SvI128(aTHX_ a) % SvI128(aTHX_ b);
+
+void
+mi128_int128_divmod(self, rem, a, b)
+    SV *self
+    SV *rem
+    SV *a
+    SV *b
+PREINIT:
+    int128_t ai, bi, di, ri;
+CODE:
+    ai = SvI128(aTHX_ a);
+    bi = SvI128(aTHX_ b);
+    di = ai / bi;
+    ri = ai - bi * di;
+    SvI128x(self) = di;
+    SvI128x(rem) = ri;
+
+void
+mi128_int128_not(self, a)
+    SV *self
+    SV *a
+CODE:
+     SvI128x(self) = ~SvI128(aTHX_ a);
+
+void
+mi128_int128_neg(self, a)
+     SV *self
+     SV *a
+CODE:
+     SvI128x(self) = -SvI128(aTHX_ a);
+
+void
+mi128_int128_and(self, a, b)
+     SV *self
+     SV *a
+     SV *b
+CODE:
+     SvI128x(self) = SvI128(aTHX_ a) & SvI128(aTHX_ b);
+
+void
+mi128_int128_or(self, a, b)
+     SV *self
+     SV *a
+     SV *b
+CODE:
+     SvI128x(self) = SvI128(aTHX_ a) | SvI128(aTHX_ b);
+
+void
+mi128_int128_xor(self, a, b)
+     SV *self
+     SV *a
+     SV *b
+CODE:
+     SvI128x(self) = SvI128(aTHX_ a) ^ SvI128(aTHX_ b);
+
+void
+mi128_int128_left(self, a, b)
+     SV *self
+     SV *a
+     UV b
+CODE:
+     SvI128x(self) = SvI128(aTHX_ a) << b;
+
+void
+mi128_int128_right(self, a, b)
+     SV *self
+     SV *a
+     UV b
+CODE:
+     SvI128x(self) = SvI128(aTHX_ a) >> b;
+
+
+MODULE = Math::Int128		PACKAGE = Math::Int128		PREFIX=mu128_
+PROTOTYPES: DISABLE
+
+void
+mu128_uint128_add(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvU128x(self) = SvU128(aTHX_ a) + SvU128(aTHX_ b);
+
+void
+mu128_uint128_sub(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvU128x(self) = SvU128(aTHX_ a) - SvU128(aTHX_ b);
+
+void
+mu128_uint128_mul(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvU128x(self) = SvU128(aTHX_ a) * SvU128(aTHX_ b);
+
+void
+mu128_uint128_div(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvU128x(self) = SvU128(aTHX_ a) / SvU128(aTHX_ b);
+
+void
+mu128_uint128_mod(self, a, b)
+    SV *self
+    SV *a
+    SV *b
+CODE:
+    SvU128x(self) = SvU128(aTHX_ a) % SvU128(aTHX_ b);
+
+void
+mu128_uint128_divmod(self, rem, a, b)
+    SV *self
+    SV *rem
+    SV *a
+    SV *b
+PREINIT:
+    uint128_t ai, bi, di, ri;
+CODE:
+    ai = SvU128(aTHX_ a);
+    bi = SvU128(aTHX_ b);
+    di = ai / bi;
+    ri = ai - bi * di;
+    SvU128x(self) = di;
+    SvU128x(rem) = ri;
+
+void
+mu128_uint128_not(self, a)
+    SV *self
+    SV *a
+CODE:
+     SvU128x(self) = ~SvU128(aTHX_ a);
+
+void
+mu128_uint128_neg(self, a)
+     SV *self
+     SV *a
+CODE:
+     SvU128x(self) = -SvU128(aTHX_ a);
+
+void
+mu128_uint128_and(self, a, b)
+     SV *self
+     SV *a
+     SV *b
+CODE:
+     SvU128x(self) = SvU128(aTHX_ a) & SvU128(aTHX_ b);
+
+void
+mu128_uint128_or(self, a, b)
+     SV *self
+     SV *a
+     SV *b
+CODE:
+     SvU128x(self) = SvU128(aTHX_ a) | SvU128(aTHX_ b);
+
+void
+mu128_uint128_xor(self, a, b)
+     SV *self
+     SV *a
+     SV *b
+CODE:
+     SvU128x(self) = SvU128(aTHX_ a) ^ SvU128(aTHX_ b);
+
+void
+mu128_uint128_left(self, a, b)
+     SV *self
+     SV *a
+     UV b
+CODE:
+     SvU128x(self) = SvU128(aTHX_ a) << b;
+
+void
+mu128_uint128_right(self, a, b)
+     SV *self
+     SV *a
+     UV b
+CODE:
+     SvU128x(self) = SvU128(aTHX_ a) >> b;
