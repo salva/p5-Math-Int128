@@ -165,26 +165,9 @@ atoi128(pTHX_ SV *sv) {
 static int
 check_class(pTHX_ SV *rv) {
     if (SvOBJECT(rv) && SvPOK(rv) && (SvCUR(rv) == I128LEN)) {
-        const char *klass = HvNAME_get(SvSTASH(rv));
-        if (klass) {
-            if ((klass[0] == 'M') &&
-                (klass[1] == 'a') &&
-                (klass[2] == 't') &&
-                (klass[3] == 'h') &&
-                (klass[4] == ':') &&
-                (klass[5] == ':')) {
-                klass += (klass[6] == 'U' ? 7 : 6);
-                if ((klass[0] == 'I') &&
-                    (klass[1] == 'n') &&
-                    (klass[2] == 't') &&
-                    (klass[3] == '1') &&
-                    (klass[4] == '2') &&
-                    (klass[5] == '8') &&
-                    (klass[6] == '\0')) {
-                    return 1;
-                }
-            }
-        }
+        HV *stash = SvSTASH(rv);
+        if ((stash == package_int128_stash) || (stash == package_uint128_stash))
+            return 1;
     }
     return 0;
 }
