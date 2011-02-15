@@ -162,22 +162,15 @@ atoi128(pTHX_ SV *sv) {
     return atoui128(aTHX_ pv, len, "int128_t");
 }
 
-static int
-check_class(pTHX_ SV *rv) {
-    if (SvOBJECT(rv) && SvPOK(rv) && (SvCUR(rv) == I128LEN)) {
-        HV *stash = SvSTASH(rv);
-        if ((stash == package_int128_stash) || (stash == package_uint128_stash))
-            return 1;
-    }
-    return 0;
-}
-
 static int128_t
 SvI128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
-        if (check_class(aTHX_ si128))
-            return SvI128Y(si128);
+        if (SvOBJECT(si128) && SvPOK(si128) && (SvCUR(si128) == I128LEN)) {
+            HV *stash = SvSTASH(si128);
+            if ((stash == package_int128_stash) || (stash == package_uint128_stash))
+                return SvI128Y(si128);
+        }
     }
     else {
         SvGETMAGIC(sv);
@@ -197,8 +190,11 @@ static uint128_t
 SvU128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
-        if (check_class(aTHX_ su128))
-            return SvI128Y(su128);
+        if (SvOBJECT(su128) && SvPOK(su128) && (SvCUR(su128) == I128LEN)) {
+            HV *stash = SvSTASH(su128);
+            if ((stash == package_int128_stash) || (stash == package_uint128_stash))
+                return SvI128Y(su128);
+        }
     }
     else {
         SvGETMAGIC(sv);
