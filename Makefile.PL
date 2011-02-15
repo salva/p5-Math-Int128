@@ -8,5 +8,5 @@ WriteMakefile(NAME => 'Math::Int128',
               INC => '-I.',
               # OPTIMIZE => '-g -O0',
               # Un-comment this if you add C files to link with later:
-              # OBJECT => '$(O_FILES)', # link all the C files too
+              # OBJECT => '$(O_FILES)',
              );

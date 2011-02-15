@@ -8,9 +8,6 @@
 
 #include "ppport.h"
 
-static HV *package_int128_stash;
-static HV *package_uint128_stash;
-
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
 
@@ -18,6 +15,9 @@ typedef unsigned __int128 uint128_t;
 //typedef unsigned long long uint128_t;
 
 #define I128LEN sizeof(int128_t)
+
+static HV *package_int128_stash;
+static HV *package_uint128_stash;
 
 #define SvI128Y(sv) (*((int128_t*)SvPVX(sv)))
 #define SVt_I128 SVt_PV
@@ -31,24 +31,6 @@ new_si128(pTHX) {
 }
 
 #define new_su128 new_si128
-
-static int
-SvI128OK(pTHX_ SV *sv) {
-    if (SvROK(sv)) {
-        SV *si128 = SvRV(sv);
-        return (si128 && (SvTYPE(si128) >= SVt_I128) && sv_isa(sv, "Math::Int128"));
-    }
-    return 0;
-}
-
-static int
-SvU128OK(pTHX_ SV *sv) {
-    if (SvROK(sv)) {
-        SV *su128 = SvRV(sv);
-        return (su128 && (SvTYPE(su128) >= SVt_I128) && sv_isa(sv, "Math::UInt128"));
-    }
-    return 0;
-}
 
 static SV *
 newSVi128(pTHX_ int128_t i128) {
@@ -77,7 +59,7 @@ static SV *
 SvSI128(pTHX_ SV *sv) {
     if (SvRV(sv)) {
         SV *si128 = SvRV(sv);
-        if (si128 && SvPOK(si128) && (SvCUR(si128) == I128LEN))
+        if (SvPOK(si128) && (SvCUR(si128) == I128LEN))
             return si128;
     }
     Perl_croak(aTHX_ "internal error: reference to int128_t expected");
@@ -87,7 +69,7 @@ static SV *
 SvSU128(pTHX_ SV *sv) {
     if (SvRV(sv)) {
         SV *su128 = SvRV(sv);
-        if (su128 && SvPOK(su128) && (SvCUR(su128) == I128LEN))
+        if (SvPOK(su128) && (SvCUR(su128) == I128LEN))
             return su128;
     }
     Perl_croak(aTHX_ "internal error: reference to uint128_t expected");
@@ -180,15 +162,42 @@ atoi128(pTHX_ SV *sv) {
     return atoui128(aTHX_ pv, len, "int128_t");
 }
 
+static int
+check_class(pTHX_ SV *rv) {
+    if (SvOBJECT(rv) && SvPOK(rv) && (SvCUR(rv) == I128LEN)) {
+        const char *klass = HvNAME_get(SvSTASH(rv));
+        if (klass) {
+            if ((klass[0] == 'M') &&
+                (klass[1] == 'a') &&
+                (klass[2] == 't') &&
+                (klass[3] == 'h') &&
+                (klass[4] == ':') &&
+                (klass[5] == ':')) {
+                klass += (klass[6] == 'U' ? 7 : 6);
+                if ((klass[0] == 'I') &&
+                    (klass[1] == 'n') &&
+                    (klass[2] == 't') &&
+                    (klass[3] == '1') &&
+                    (klass[4] == '2') &&
+                    (klass[5] == '8') &&
+                    (klass[6] == '\0')) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 static int128_t
 SvI128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
-        if (SvPOK(si128) && (SvCUR(si128) == I128LEN) &&
-            (sv_isa(sv, "Math::Int128") || sv_isa(sv, "Math::UInt128")))
+        if (check_class(aTHX_ si128))
             return SvI128Y(si128);
     }
     else {
+        SvGETMAGIC(sv);
         if (SvIOK(sv)) {
             if (SvIOK_UV(sv))
                 return SvUV(sv);
@@ -205,11 +214,11 @@ static uint128_t
 SvU128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
-        if (SvPOK(su128) && (SvCUR(su128) == I128LEN) &&
-            (sv_isa(sv, "Math::UInt128") || sv_isa(sv, "Math::Int128")))
+        if (check_class(aTHX_ su128))
             return SvI128Y(su128);
     }
     else {
+        SvGETMAGIC(sv);
         if (SvIOK(sv)) {
             if (SvIOK_UV(sv))
                 return SvUV(sv);
