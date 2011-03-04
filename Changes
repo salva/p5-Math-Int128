@@ -1,5 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
+0.03  Mar 4, 2011
+      - abort Makefile.PL unless compiler is GCC 4.6 or better
+
 0.02  Feb 14, 2011
       - add new set of operations that use one argument for output for
         improved performance
