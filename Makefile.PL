@@ -16,6 +16,7 @@ my $cc = (grep defined, $mm->{CC}, $onfig{cc}, 'cc')[0];
 
 my $cc_version = `$cc --version`;
 unless ($cc_version =~ /cc\s+\([^)]*\)\s+4\.(\d+)/i and $1 >= 6) {
+    unlink $mm->{MAKEFILE};
     die "This module requires version 4.6 or above of the GCC compiler.\nAborting!\n\n"
 }
 

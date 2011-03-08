@@ -1,5 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
+0.04  Mar 8, 2011
+      - delete generated Makefile when aborting Makefile.PL
+
 0.03  Mar 4, 2011
       - abort Makefile.PL unless compiler is GCC 4.6 or better
 
