@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    our $VERSION = '0.04';
+    our $VERSION = '0.05';
 
     require XSLoader;
     XSLoader::load('Math::Int128', $VERSION);
@@ -150,26 +150,7 @@ Math::Int128 - Manipulate 128 bits integers in Perl
 This module adds support for 128 bit integers, signed and unsigned, to
 Perl.
 
-=head1 INSTALL
-
-In order to compile this module, the development version of GCC (which
-will eventually become GCC 4.6) that includes support for 128 bits
-arithmetic is required.
-
-It can be installed as follows:
-
-  $ svn checkout svn://gcc.gnu.org/svn/gcc/trunk gcc
-  $ cd gcc
-  $ ./configure --disable-bootstrap --prefix=/usr/local/gcc
-  $ make
-  $ sudo make install
-
-Then, to compile Math::Int128
-
-  $ cd ~/Math-Int128-*
-  $ perl Makefile CC=/usr/local/gcc/bin/gcc
-  $ make
-  $ sudo make install
+In order to compile this module GCC 4.4 or later is required.
 
 =head1 API
 

@@ -8,11 +8,18 @@
 
 #include "ppport.h"
 
+#if __GNUC__ == 4 && __GNUC_MINOR__ >= 4 && __GNUC_MINOR__ < 6
+
+/* workaroung for gcc 4.4/4.5 - see http://gcc.gnu.org/gcc-4.4/changes.html */
+typedef int int128_t __attribute__ ((__mode__ (TI)));
+typedef unsigned int uint128_t __attribute__ ((__mode__ (TI)));
+
+#else
+
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
 
-//typedef long long int128_t;
-//typedef unsigned long long uint128_t;
+#endif
 
 #define I128LEN sizeof(int128_t)
 
