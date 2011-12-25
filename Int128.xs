@@ -5,8 +5,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-
 #include "ppport.h"
+#include "perl_math_int64.h"
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ >= 4 && __GNUC_MINOR__ < 6
 
@@ -173,10 +173,34 @@ static int128_t
 SvI128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
-        if (SvOBJECT(si128) && SvPOK(si128) && (SvCUR(si128) == I128LEN)) {
+        if (SvOBJECT(si128)) {
             HV *stash = SvSTASH(si128);
-            if ((stash == package_int128_stash) || (stash == package_uint128_stash))
-                return SvI128Y(si128);
+            char const * classname = HvNAME_get(stash);
+            if (strncmp(classname, "Math::", 6) == 0) {
+                int u;
+                if (classname[6] == 'U') {
+                    classname += 7;
+                    u = 1;
+                }
+                else {
+                    classname += 6;
+                    u = 0;
+                }
+                if (strncmp(classname, "Int", 3) == 0) {
+                    classname += 3;
+                    if (strcmp(classname, "128") == 0) {
+                        if (!SvPOK(si128) || (SvCUR(si128) != I128LEN))
+                            Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
+                        return SvI128Y(si128);
+                    }
+                    if (strcmp(classname, "64") == 0) {
+                        if (u) {
+                            return SvU64(sv);
+                        }
+                        return SvI64(sv);
+                    }
+                }
+            }
         }
     }
     else {
@@ -197,10 +221,34 @@ static uint128_t
 SvU128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
-        if (SvOBJECT(su128) && SvPOK(su128) && (SvCUR(su128) == I128LEN)) {
+        if (SvOBJECT(su128)) {
             HV *stash = SvSTASH(su128);
-            if ((stash == package_int128_stash) || (stash == package_uint128_stash))
-                return SvI128Y(su128);
+            char const * classname = HvNAME_get(stash);
+            if (strncmp(classname, "Math::", 6) == 0) {
+                int u;
+                if (classname[6] == 'U') {
+                    classname += 7;
+                    u = 1;
+                }
+                else {
+                    classname += 6;
+                    u = 0;
+                }
+                if (strncmp(classname, "Int", 3) == 0) {
+                    classname += 3;
+                    if (strcmp(classname, "128") == 0) {
+                        if (!SvPOK(su128) || (SvCUR(su128) != I128LEN))
+                            Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
+                        return SvU128Y(su128);
+                    }
+                    if (strcmp(classname, "64") == 0) {
+                        if (u) {
+                            return SvU64(sv);
+                        }
+                        return SvI64(sv);
+                    }
+                }
+            }
         }
     }
     else {
