@@ -27,6 +27,7 @@ static HV *package_int128_stash;
 static HV *package_uint128_stash;
 
 #define SvI128Y(sv) (*((int128_t*)SvPVX(sv)))
+#define SvU128Y(sv) (*((uint128_t*)SvPVX(sv)))
 #define SVt_I128 SVt_PV
 
 static SV *
@@ -137,7 +138,8 @@ atou128(pTHX_ SV *sv) {
         pv++; len--;
     }
     skip_zeros;
-    if ((len >= 39) && (strncmp(pv, "340282366920938463463374607431768211456", len) >= 0))
+    if ( (len > 39) ||
+         ((len == 39) && (strncmp(pv, "340282366920938463463374607431768211456", len) >= 0)) )
         Perl_croak(aTHX_ "Integer overflow in conversion to uint128_t");
     return atoui128(aTHX_ pv, len, "uint128_t");
 }
@@ -151,14 +153,15 @@ atoi128(pTHX_ SV *sv) {
             pv++; len--;
         }
         else if (*pv == '-') {
+            int cmp;
             pv++; len--;
             skip_zeros;
             if (len >= 39) {
-                int cmp = strncmp(pv, "170141183460469231731687303715884105728", len);
+                cmp = strcmp(pv, "170141183460469231731687303715884105728");
+                if ((len > 39) || (cmp > 0))
+                    Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
                 if (cmp == 0)
                     return (((int128_t)1) << 127);
-                if (cmp > 0)
-                    Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
             }
             return -atoui128(aTHX_ pv, len, "int128_t");
         }
@@ -173,7 +176,8 @@ static int128_t
 SvI128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
-        if (SvOBJECT(si128)) {
+        if (si128 && SvOBJECT(si128)) {
+            GV *method;
             HV *stash = SvSTASH(si128);
             char const * classname = HvNAME_get(stash);
             if (strncmp(classname, "Math::", 6) == 0) {
@@ -201,6 +205,29 @@ SvI128(pTHX_ SV *sv) {
                     }
                 }
             }
+            method = gv_fetchmethod(stash, "as_int128");
+            if (method) {
+                SV *result;
+                int count;
+                dSP;
+                ENTER;
+                SAVETMPS;
+                PUSHSTACKi(PERLSI_MAGIC);
+                PUSHMARK(SP);
+                XPUSHs(sv);
+                PUTBACK;
+                count = perl_call_sv( (SV*)method, G_SCALAR );
+                SPAGAIN;
+                if (count != 1)
+                    Perl_croak(aTHX_ "internal error: method call returned %d values, 1 expected", count);
+                result = newSVsv(POPs);
+                PUTBACK;
+                POPSTACK;
+                SPAGAIN;
+                FREETMPS;
+                LEAVE;
+                return SvI128(aTHX_ sv_2mortal(result));
+            }
         }
     }
     else {
@@ -221,7 +248,8 @@ static uint128_t
 SvU128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
-        if (SvOBJECT(su128)) {
+        if (su128 && SvOBJECT(su128)) {
+            GV *method;
             HV *stash = SvSTASH(su128);
             char const * classname = HvNAME_get(stash);
             if (strncmp(classname, "Math::", 6) == 0) {
@@ -249,6 +277,30 @@ SvU128(pTHX_ SV *sv) {
                     }
                 }
             }
+            method = gv_fetchmethod(stash, "as_uint128");
+            if (method) {
+                SV *result;
+                int count;
+                dSP;
+                ENTER;
+                SAVETMPS;
+                PUSHSTACKi(PERLSI_MAGIC);
+                PUSHMARK(SP);
+                XPUSHs(sv);
+                PUTBACK;
+                count = perl_call_sv( (SV*)method, G_SCALAR );
+                SPAGAIN;
+                if (count != 1)
+                    Perl_croak(aTHX_ "internal error: method call returned %d values, 1 expected", count);
+                result = newSVsv(POPs);
+                PUTBACK;
+                POPSTACK;
+                SPAGAIN;
+                FREETMPS;
+                LEAVE;
+                return SvU128(aTHX_ sv_2mortal(result));
+            }
+
         }
     }
     else {
@@ -331,8 +383,10 @@ u128_to_hex(uint128_t i128, char *to) {
 MODULE = Math::Int128		PACKAGE = Math::Int128			PREFIX=miu128_	
 
 BOOT:
-package_int128_stash = gv_stashsv(newSVpv("Math::Int128", 0), 1);
-package_uint128_stash = gv_stashsv(newSVpv("Math::UInt128", 0), 1);
+
+    package_int128_stash = gv_stashsv(newSVpv("Math::Int128", 0), 1);
+    package_uint128_stash = gv_stashsv(newSVpv("Math::UInt128", 0), 1);
+    MATH_INT64_BOOT;
 
 SV *
 miu128_int128(value=0)

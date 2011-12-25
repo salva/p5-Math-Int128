@@ -10,7 +10,9 @@ BEGIN {
     XSLoader::load('Math::Int128', $VERSION);
 }
 
-
+use constant MAX_INT128  => string_to_int128 ( '0x7fff_ffff_ffff_ffff_ffff_ffff_ffff_ffff');
+use constant MIN_INT128  => string_to_int128 ('-0x8000_0000_0000_0000_0000_0000_0000_0000');
+use constant MAX_UINT128 => string_to_uint128( '0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff');
 
 require Exporter;
 
@@ -55,7 +57,10 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128 )],
                                    uint128_or
                                    uint128_xor
                                    uint128_left
-                                   uint128_right )] );
+                                   uint128_right )]
+                   limits  => [qw( MAX_INT128
+                                   MIN_INT128
+                                   MAX_UINT128 )] );
 
 our @EXPORT_OK = map @$_, values %EXPORT_TAGS;
 
@@ -128,6 +133,12 @@ use overload ( '+' => \&_add,
                fallback => 1 );
 
 
+
+
+sub as_int64 {
+    
+}
+
 1;
 
 __END__
@@ -150,12 +161,12 @@ Math::Int128 - Manipulate 128 bits integers in Perl
 This module adds support for 128 bit integers, signed and unsigned, to
 Perl.
 
-In order to compile this module GCC 4.4 or later is required.
+In order to compile this module, GCC 4.4 or later is required.
 
 =head1 API
 
 See L<Math::Int64>. This module provides a similar set of functions,
-just C<s/64/128/>.
+just C<s/64/128/g> ;-)
 
 Besides that, as object allocation and destruction has been found to
 be a bottleneck, an alternative set of operations that use their first
@@ -186,6 +197,8 @@ C<int128_divmod> returns both the result of the division and the remainder:
   int128_divmod($ret, $rem, $a, $b);
 
 =head1 SEE ALSO
+
+L<Math::Int64>, L<Math::GMP>, L<Math::GMPn>.
 
 L<http://perlmonks.org/?node_id=886488>.
 
