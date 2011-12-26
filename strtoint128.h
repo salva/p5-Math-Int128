@@ -39,13 +39,13 @@
  * Convert a string to an int64_t/uint64_t.
  */
 
-static uint64_t
-strtoint64(pTHX_ const char *s, int base, int sign)
+static uint128_t
+strtoint128(pTHX_ const char *s, int base, int sign)
 {
-	uint64_t acc = 0;
+	uint128_t acc = 0;
 	int c, neg, between = 0;
 
-        uint64_t upper_mul_limit;
+        uint128_t upper_mul_limit;
 
 	/*
 	 * Skip white space and pick up leading +/- sign if any.
@@ -58,7 +58,7 @@ strtoint64(pTHX_ const char *s, int base, int sign)
 	if (c == '-') {
  		neg = 1;
 		c = *s++;
-                if (!sign) overflow(aTHX_ "negative sign found when parsing unsigned number");
+                /* if (!sign) overflow(aTHX_ "negative sign found when parsing unsigned number"); */
 	} else {
 		neg = 0;
 		if (c == '+')
@@ -72,8 +72,8 @@ strtoint64(pTHX_ const char *s, int base, int sign)
 	}
 	if (base == 0)
 		base = c == '0' ? 8 : 10;
-
-        if (may_die_on_overflow) upper_mul_limit = UINT64_MAX / base;
+        
+        // if (may_die_on_overflow) upper_mul_limit = UINT128_MAX / base;
 
         for (;; c = (unsigned char) *s++) {
                 if (isdigit(c))
@@ -86,19 +86,21 @@ strtoint64(pTHX_ const char *s, int base, int sign)
 			break;
                 if (c >= base)
 			break;
-                if (may_die_on_overflow) {
-                    if (acc > upper_mul_limit) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u));
-                    acc *= base;
-                    if (UINT64_MAX - acc < c) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u));
-                    acc += c;
-                }
-                else {
-                    acc = acc * base + c;
-                }
+                /* if (may_die_on_overflow) { */
+                /*     if (acc > upper_mul_limit) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u)); */
+                /*     acc *= base; */
+                /*     if (UINT128_MAX - acc < c) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u)); */
+                /*     acc += c; */
+                /* } */
+                /* else { */
+                /*     acc = acc * base + c; */
+                /* } */
+
+                acc = acc * base + c;
                 between = 1;
         }
-        if ( may_die_on_overflow && sign &&
-             ( acc > (neg ? (~(uint64_t)INT64_MIN + 1) : INT64_MAX) ) ) overflow(aTHX_ out_of_bounds_error_s);
+        /* if ( may_die_on_overflow && sign && */
+        /*      ( acc > (neg ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX) ) ) overflow(aTHX_ out_of_bounds_error_s); */
 
         return (neg ? ~acc + 1 : acc);
 }

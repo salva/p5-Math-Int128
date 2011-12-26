@@ -23,6 +23,12 @@ typedef unsigned __int128 uint128_t;
 
 #define I128LEN sizeof(int128_t)
 
+#define INT128_MAX ((int128_t)((~(uint128_t)0)>>1))
+#define INT128_MIN (~INT128_MAX)
+#define UINT128_MAX (~(int128_t)0)
+
+#include <strtoint128.h>
+
 static HV *package_int128_stash;
 static HV *package_uint128_stash;
 
@@ -86,91 +92,91 @@ SvSU128(pTHX_ SV *sv) {
 #define SvI128x(sv) SvI128Y(SvSI128(aTHX_ sv))
 #define SvU128x(sv) SvI128Y(SvSU128(aTHX_ sv))
 
-static const U32 my_pow10[] = { 1,
-                                10,
-                                100,
-                                1000,
-                                10000,
-                                100000,
-                                1000000,
-                                10000000,
-                                100000000,
-                                1000000000 };
+/* static const U32 my_pow10[] = { 1, */
+/*                                 10, */
+/*                                 100, */
+/*                                 1000, */
+/*                                 10000, */
+/*                                 100000, */
+/*                                 1000000, */
+/*                                 10000000, */
+/*                                 100000000, */
+/*                                 1000000000 }; */
 
-static uint128_t
-atoui128(pTHX_ const char *pv, STRLEN len, char *type) {
-    uint128_t u128 = 0;
-    STRLEN i;
+/* static uint128_t */
+/* atoui128(pTHX_ const char *pv, STRLEN len, char *type) { */
+/*     uint128_t u128 = 0; */
+/*     STRLEN i; */
 
-    if (len == 0) {
-        if (ckWARN(WARN_NUMERIC))
-            Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
-                        "Argument isn't numeric in conversion to %s", type);
-        return 0;
-    }
+/*     if (len == 0) { */
+/*         if (ckWARN(WARN_NUMERIC)) */
+/*             Perl_warner(aTHX_ packWARN(WARN_NUMERIC), */
+/*                         "Argument isn't numeric in conversion to %s", type); */
+/*         return 0; */
+/*     } */
 
-    while (1) {
-        U32 acu32 = 0;
-        for (i = 0; i < 9; i++) {
-            U32 c = *(pv++);
-            if ((c >= '0') && (c <= '9'))
-                acu32 = acu32 * 10 + (c - '0');
-            else {
-                if (ckWARN(WARN_NUMERIC) && (len != i))
-                    Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
-                                "Argument isn't numeric in conversion to %s", type);
-                return u128 * my_pow10[i] + acu32;
-            }
-        }
-        u128 *= 1000000000;
-        u128 += acu32;
-        len -= 9;
-    }
-}
+/*     while (1) { */
+/*         U32 acu32 = 0; */
+/*         for (i = 0; i < 9; i++) { */
+/*             U32 c = *(pv++); */
+/*             if ((c >= '0') && (c <= '9')) */
+/*                 acu32 = acu32 * 10 + (c - '0'); */
+/*             else { */
+/*                 if (ckWARN(WARN_NUMERIC) && (len != i)) */
+/*                     Perl_warner(aTHX_ packWARN(WARN_NUMERIC), */
+/*                                 "Argument isn't numeric in conversion to %s", type); */
+/*                 return u128 * my_pow10[i] + acu32; */
+/*             } */
+/*         } */
+/*         u128 *= 1000000000; */
+/*         u128 += acu32; */
+/*         len -= 9; */
+/*     } */
+/* } */
 
-#define skip_zeros for(;len > 1 && *pv == '0'; pv++, len--);
+/* #define skip_zeros for(;len > 1 && *pv == '0'; pv++, len--); */
 
-static int128_t
-atou128(pTHX_ SV *sv) {
-    STRLEN len;
-    const char *pv = SvPV_const(sv, len);
-    if (len && (*pv == '+')) {
-        pv++; len--;
-    }
-    skip_zeros;
-    if ( (len > 39) ||
-         ((len == 39) && (strncmp(pv, "340282366920938463463374607431768211456", len) >= 0)) )
-        Perl_croak(aTHX_ "Integer overflow in conversion to uint128_t");
-    return atoui128(aTHX_ pv, len, "uint128_t");
-}
+/* static int128_t */
+/* atou128(pTHX_ SV *sv) { */
+/*     STRLEN len; */
+/*     const char *pv = SvPV_const(sv, len); */
+/*     if (len && (*pv == '+')) { */
+/*         pv++; len--; */
+/*     } */
+/*     skip_zeros; */
+/*     if ( (len > 39) || */
+/*          ((len == 39) && (strncmp(pv, "340282366920938463463374607431768211456", len) >= 0)) ) */
+/*         Perl_croak(aTHX_ "Integer overflow in conversion to uint128_t"); */
+/*     return atoui128(aTHX_ pv, len, "uint128_t"); */
+/* } */
 
-static int128_t
-atoi128(pTHX_ SV *sv) {
-    STRLEN len;
-    const char *pv = SvPV_const(sv, len);
-    if (len) {
-        if (*pv == '+') {
-            pv++; len--;
-        }
-        else if (*pv == '-') {
-            int cmp;
-            pv++; len--;
-            skip_zeros;
-            if (len >= 39) {
-                cmp = strcmp(pv, "170141183460469231731687303715884105728");
-                if ((len > 39) || (cmp > 0))
-                    Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
-                if (cmp == 0)
-                    return (((int128_t)1) << 127);
-            }
-            return -atoui128(aTHX_ pv, len, "int128_t");
-        }
-        skip_zeros;
-        if ((len >= 39) && (strncmp(pv, "170141183460469231731687303715884105728", len) >= 0))
-            Perl_croak(aTHX_ "Integer overflow in conversion to int128_t");
-    }
-    return atoui128(aTHX_ pv, len, "int128_t");
-}
+/* static int128_t */
+/* atoi128(pTHX_ SV *sv) { */
+/*     STRLEN len; */
+/*     const char *pv = SvPV_const(sv, len); */
+/*     if (len) { */
+/*         if (*pv == '+') { */
+/*             pv++; len--; */
+/*         } */
+/*         else if (*pv == '-') { */
+/*             int cmp; */
+/*             pv++; len--; */
+/*             skip_zeros; */
+/*             if (len >= 39) { */
+/*                 cmp = strcmp(pv, "170141183460469231731687303715884105728"); */
+/*                 if ((len > 39) || (cmp > 0)) */
+/*                     Perl_croak(aTHX_ "Integer overflow in conversion to int128_t"); */
+/*                 if (cmp == 0) */
+/*                     return (((int128_t)1) << 127); */
+/*             } */
+/*             return -atoui128(aTHX_ pv, len, "int128_t"); */
+/*         } */
+/*         skip_zeros; */
+/*         if ((len >= 39) && (strncmp(pv, "170141183460469231731687303715884105728", len) >= 0)) */
+/*             Perl_croak(aTHX_ "Integer overflow in conversion to int128_t"); */
+/*     } */
+/*     return atoui128(aTHX_ pv, len, "int128_t"); */
+/* } */
 
 static int128_t
 SvI128(pTHX_ SV *sv) {
@@ -241,7 +247,7 @@ SvI128(pTHX_ SV *sv) {
             return SvNV(sv);
         }
     }
-    return atoi128(aTHX_ sv);
+    return strtoint128(aTHX_ SvPV_nolen(sv), 10, 1);
 }
 
 static uint128_t
@@ -312,7 +318,7 @@ SvU128(pTHX_ SV *sv) {
         }
         if (SvNOK(sv)) return SvNV(sv);
     }
-    return atou128(aTHX_ sv);
+    return strtoint128(aTHX_ SvPV_nolen(sv), 10, 0);
 }
 
 static SV *
@@ -601,6 +607,24 @@ CODE:
     SvCUR_set(RETVAL, I128LEN * 2);
     pv = SvPVX(RETVAL);
     u128_to_hex(u128, pv);
+OUTPUT:
+    RETVAL
+
+SV *
+miu128_string_to_int128(str, base = 0)
+    const char *str;
+    int base;
+CODE:
+    RETVAL = newSVi128(aTHX_ strtoint128(aTHX_ str, base, 1));
+OUTPUT:
+    RETVAL
+
+SV *
+miu128_string_to_uint128(str, base = 0)
+    const char *str;
+    int base;
+CODE:
+    RETVAL = newSVu128(aTHX_ strtoint128(aTHX_ str, base, 0));
 OUTPUT:
     RETVAL
 

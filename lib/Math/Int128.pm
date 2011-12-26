@@ -57,7 +57,7 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128 )],
                                    uint128_or
                                    uint128_xor
                                    uint128_left
-                                   uint128_right )]
+                                   uint128_right )],
                    limits  => [qw( MAX_INT128
                                    MIN_INT128
                                    MAX_UINT128 )] );
