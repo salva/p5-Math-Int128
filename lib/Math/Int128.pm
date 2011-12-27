@@ -1,3 +1,4 @@
+
 package Math::Int128;
 
 use strict;
@@ -18,7 +19,9 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 
-our %EXPORT_TAGS = ( ctors => [qw( int128 uint128 )],
+our %EXPORT_TAGS = ( ctors => [qw( int128 uint128
+                                   string_to_int128
+                                   string_to_uint128 )],
                      pack  => [qw( int128_to_number
                                    int128_to_hex
                                    net_to_int128

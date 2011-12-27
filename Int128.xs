@@ -27,6 +27,49 @@ typedef unsigned __int128 uint128_t;
 #define INT128_MIN (~INT128_MAX)
 #define UINT128_MAX (~(int128_t)0)
 
+int may_die_on_overflow;
+
+#if (PERL_VERSION >= 10)
+
+#ifndef cop_hints_fetch_pvs
+#define cop_hints_fetch_pvs(cop, key, flags) \
+    Perl_refcounted_he_fetch(aTHX_ (cop)->cop_hints_hash, NULL, STR_WITH_LEN(key), (flags), 0)
+#endif
+
+static int
+check_die_on_overflow_hint(pTHX) {
+    SV *hint = cop_hints_fetch_pvs(PL_curcop, "Math::Int128::die_on_overflow", 0);
+    return (hint && SvTRUE(hint));
+}
+
+#else
+
+static int
+check_die_on_overflow_hint(pTHX) {
+    return 1;
+}
+
+#endif
+
+static void
+overflow(pTHX_ char *msg) {
+    if (check_die_on_overflow_hint(aTHX))
+        Perl_croak(aTHX_ "Math::Int128 overflow: %s", msg);
+}
+
+static char *out_of_bounds_error_s = "number is out of bounds for int128_t conversion";
+static char *out_of_bounds_error_u = "number is out of bounds for uint128_t conversion";
+static char *mul_error            = "multiplication overflows";
+static char *add_error            = "addition overflows";
+static char *sub_error            = "subtraction overflows";
+static char *inc_error            = "increment operation wraps";
+static char *dec_error            = "decrement operation wraps";
+static char *left_b_error         = "left-shift right operand is out of bounds";
+static char *left_error           = "left shift overflows";
+static char *right_b_error        = "right-shift right operand is out of bounds";
+static char *right_error          = "right shift overflows";
+
+
 #include <strtoint128.h>
 
 static HV *package_int128_stash;
@@ -201,6 +244,12 @@ SvI128(pTHX_ SV *sv) {
                     if (strcmp(classname, "128") == 0) {
                         if (!SvPOK(si128) || (SvCUR(si128) != I128LEN))
                             Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
+                        if (u) {
+                            int128_t u128 = SvU128Y(si128);
+                            if (may_die_on_overflow && (u128 > INT128_MAX))
+                                overflow(aTHX_ out_of_bounds_error_s);
+                            return u128;
+                        }
                         return SvI128Y(si128);
                     }
                     if (strcmp(classname, "64") == 0) {
@@ -244,7 +293,10 @@ SvI128(pTHX_ SV *sv) {
             return SvIV(sv);
         }
         if (SvNOK(sv)) {
-            return SvNV(sv);
+            NV nv = SvNV(sv);
+            if (may_die_on_overflow &&
+                ((nv >= 0x1p127) || (nv < -0x1p127))) overflow(aTHX_ out_of_bounds_error_s);
+            return nv;
         }
     }
     return strtoint128(aTHX_ SvPV_nolen(sv), 10, 1);
@@ -273,13 +325,23 @@ SvU128(pTHX_ SV *sv) {
                     if (strcmp(classname, "128") == 0) {
                         if (!SvPOK(su128) || (SvCUR(su128) != I128LEN))
                             Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
-                        return SvU128Y(su128);
+                        if (u)
+                            return SvU128Y(su128);
+                        else {
+                            int128_t i128 = SvI128Y(su128);
+                            if (may_die_on_overflow && (i128 < 0)) overflow(aTHX_ out_of_bounds_error_u);
+                            return i128;
+                        }
                     }
                     if (strcmp(classname, "64") == 0) {
                         if (u) {
                             return SvU64(sv);
                         }
-                        return SvI64(sv);
+                        else {
+                            int64_t i64 = SvI64(sv);
+                            if (may_die_on_overflow && (i64 < 0)) overflow(aTHX_ out_of_bounds_error_u);
+                            return i64;
+                        }
                     }
                 }
             }
@@ -314,9 +376,17 @@ SvU128(pTHX_ SV *sv) {
         if (SvIOK(sv)) {
             if (SvIOK_UV(sv))
                 return SvUV(sv);
-            return SvIV(sv);
+            else {
+                IV iv = SvIV(sv);
+                if (may_die_on_overflow && (iv < 0)) overflow(aTHX_ out_of_bounds_error_u);
+                return iv;
+            }
         }
-        if (SvNOK(sv)) return SvNV(sv);
+        if (SvNOK(sv)) {
+            NV nv = SvNV(sv);
+            if (may_die_on_overflow && ((nv < 0) || (nv >= 0x1p128))) overflow(aTHX_ out_of_bounds_error_u);
+            return nv;
+        }
     }
     return strtoint128(aTHX_ SvPV_nolen(sv), 10, 0);
 }
@@ -389,7 +459,7 @@ u128_to_hex(uint128_t i128, char *to) {
 MODULE = Math::Int128		PACKAGE = Math::Int128			PREFIX=miu128_	
 
 BOOT:
-
+    may_die_on_overflow = 0;
     package_int128_stash = gv_stashsv(newSVpv("Math::Int128", 0), 1);
     package_uint128_stash = gv_stashsv(newSVpv("Math::UInt128", 0), 1);
     MATH_INT64_BOOT;

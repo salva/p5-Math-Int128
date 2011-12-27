@@ -36,72 +36,69 @@
 #include <ctype.h>
 
 /*
- * Convert a string to an int64_t/uint64_t.
+ * Convert a string to an int128_t/uint128_t.
  */
 
 static uint128_t
-strtoint128(pTHX_ const char *s, int base, int sign)
-{
-	uint128_t acc = 0;
-	int c, neg, between = 0;
+strtoint128(pTHX_ const char *s, int base, int sign) {
+    uint128_t acc = 0;
+    int c, neg, between = 0;
+    
+    uint128_t upper_mul_limit;
 
-        uint128_t upper_mul_limit;
+    /*
+     * Skip white space and pick up leading +/- sign if any.
+     * If base is 0, allow 0x for hex and 0 for octal, else
+     * assume decimal; if base is already 16, allow 0x.
+     */
+    do {
+        c = (unsigned char) *s++;
+    } while (isspace(c));
+    if (c == '-') {
+        neg = 1;
+        c = *s++;
+        if (!sign) overflow(aTHX_ "negative sign found when parsing unsigned number");
+    } else {
+        neg = 0;
+        if (c == '+')
+            c = *s++;
+    }
+    if ((base == 0 || base == 16) &&
+        c == '0' && (*s == 'x' || *s == 'X')) {
+        c = s[1];
+        s += 2;
+        base = 16;
+    }
+    if (base == 0)
+        base = c == '0' ? 8 : 10;
+    
+    // if (may_die_on_overflow) upper_mul_limit = UINT128_MAX / base;
 
-	/*
-	 * Skip white space and pick up leading +/- sign if any.
-	 * If base is 0, allow 0x for hex and 0 for octal, else
-	 * assume decimal; if base is already 16, allow 0x.
-	 */
-	do {
-		c = (unsigned char) *s++;
-	} while (isspace(c));
-	if (c == '-') {
- 		neg = 1;
-		c = *s++;
-                /* if (!sign) overflow(aTHX_ "negative sign found when parsing unsigned number"); */
-	} else {
-		neg = 0;
-		if (c == '+')
-			c = *s++;
-	}
-	if ((base == 0 || base == 16) &&
-	    c == '0' && (*s == 'x' || *s == 'X')) {
-		c = s[1];
-		s += 2;
-		base = 16;
-	}
-	if (base == 0)
-		base = c == '0' ? 8 : 10;
-        
-        // if (may_die_on_overflow) upper_mul_limit = UINT128_MAX / base;
-
-        for (;; c = (unsigned char) *s++) {
-                if (isdigit(c))
-			c -= '0';
-		else if (isalpha(c))
-			c -= isupper(c) ? 'A' - 10 : 'a' - 10;
-		else if ((c == '_') && between)
-                        continue; /* ignore underscores as Perl does */
-                else
-			break;
-                if (c >= base)
-			break;
-                /* if (may_die_on_overflow) { */
-                /*     if (acc > upper_mul_limit) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u)); */
-                /*     acc *= base; */
-                /*     if (UINT128_MAX - acc < c) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u)); */
-                /*     acc += c; */
-                /* } */
-                /* else { */
-                /*     acc = acc * base + c; */
-                /* } */
-
-                acc = acc * base + c;
-                between = 1;
+    for (;; c = (unsigned char) *s++) {
+        if (isdigit(c))
+            c -= '0';
+        else if (isalpha(c))
+            c -= isupper(c) ? 'A' - 10 : 'a' - 10;
+        else if ((c == '_') && between)
+            continue; /* ignore underscores as Perl does */
+        else
+            break;
+        if (c >= base)
+            break;
+        if (may_die_on_overflow) {
+            if (acc > upper_mul_limit) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u));
+            acc *= base;
+            if (UINT128_MAX - acc < c) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u));
+            acc += c;
         }
-        /* if ( may_die_on_overflow && sign && */
-        /*      ( acc > (neg ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX) ) ) overflow(aTHX_ out_of_bounds_error_s); */
-
-        return (neg ? ~acc + 1 : acc);
+        else {
+            acc = acc * base + c;
+        }
+        between = 1;
+    }
+    if ( may_die_on_overflow && sign &&
+         ( acc > (neg ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX) ) ) overflow(aTHX_ out_of_bounds_error_s);
+    
+    return (neg ? ~acc + 1 : acc);
 }
 
