@@ -728,7 +728,7 @@ mi128_dec(self, other, rev)
     SV *other = NO_INIT
     SV *rev = NO_INIT
 PREINIT:
-    int128_i i128 = SvI128x(self);
+    int128_t i128 = SvI128x(self);
 CODE:
     if (may_die_on_overflow && (i128 == 0)) overflow(aTHX_ dec_error);
     SvI128x(self) = i128 - 1;
@@ -918,7 +918,7 @@ CODE:
         RETVAL = newSVi128(aTHX_ (b > 128 ? 0 : (a << b)));
     else {
         RETVAL = SvREFCNT_inc(self);
-        SvI128x(self) = (b > 128 ? 0 : (a << b)));
+        SvI128x(self) = (b > 128 ? 0 : (a << b));
     }
 OUTPUT:
     RETVAL
@@ -942,7 +942,6 @@ CODE:
     if (may_die_on_overflow && (b > 128)) overflow(aTHX_ right_error);
     if (SvOK(rev))
         RETVAL = newSVi128(aTHX_ a >> b);
-    }
     else {
         RETVAL = SvREFCNT_inc(self);
         SvI128x(self) = (a >> b);
