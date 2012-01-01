@@ -1226,16 +1226,23 @@ mu128_sub(self, other, rev)
     SV *self
     SV *other
     SV *rev
+PREINIT:
+    uint128_t a, b;
 CODE:
-    if (SvOK(rev))
-        RETVAL = newSVu128(aTHX_
-                          SvTRUE(rev)
-                          ? SvU128(aTHX_ other) - SvU128x(self)
-                          : SvU128x(self) - SvU128(aTHX_ other));
+    if (SvTRUE(rev)) {
+        a = SvU64(aTHX_ other);
+        b = SvU64x(self);
+    }
     else {
-        RETVAL = self;
-        SvREFCNT_inc(RETVAL);
-        SvU128x(self) -= SvU128(aTHX_ other);
+        a = SvU64x(self);
+        b = SvU64(aTHX_ other);
+    }
+    if (may_die_on_overflow && (b > a)) overflow(aTHX_ sub_error);
+    if (SvOK(rev))
+        RETVAL = newSVu128(aTHX_ a - b);
+    else {
+        RETVAL = SvREFCNT_inc(self);
+        SvU128x(self) = a - b;
     }
 OUTPUT:
     RETVAL
@@ -1245,13 +1252,28 @@ mu128_mul(self, other, rev)
     SV *self
     SV *other
     SV *rev
+PREINIT:
+    uint128_t a = SvU128x(self);
+    uint128_t b = SvU128(aTHX_ other);
 CODE:
+    if (may_die_on_overflow) {
+        if (a < b) {
+            uint128_t tmp = a;
+            a = b; b = tmp;
+        }
+        if (b > UINT64_MAX) overflow(aTHX_ mul_error);
+        else {
+            uint128_t rl, rh;
+            rl = (a & UINT64_MAX) * b;
+            rh = (a >> 64) * b + (rl >> 64);
+            if (rh > UINT64_MAX) overflow(aTHX_ mul_error);
+        }
+    }
     if (SvOK(rev))
-        RETVAL = newSVu128(aTHX_ SvU128x(self) * SvU128(aTHX_ other));
+        RETVAL = newSVu128(aTHX_ a * b);
     else {
-        RETVAL = self;
-        SvREFCNT_inc(RETVAL);
-        SvU128x(self) *= SvU128(aTHX_ other);
+        RETVAL = SvREFCNT_inc(self);
+        SvU128x(self) = a * b;
     }
 OUTPUT:
     RETVAL
@@ -1326,26 +1348,23 @@ SV *mu128_left(self, other, rev)
     SV *self
     SV *other
     SV *rev
+PREINIT:
+    uint128_t a, b;
 CODE:
-    if (SvOK(rev)) {
-        uint128_t a, b;
-        if (SvTRUE(rev)) {
-            a = SvU128(aTHX_ other);
-            b = SvU128x(self);
-        }
-        else {
-            b = SvU128(aTHX_ other);
-            a = SvU128x(self);
-        }
-        RETVAL = newSVu128(aTHX_ (b < 128 ? (a << b) : 0));
+    if (SvTRUE(rev)) {
+        a = SvU128(aTHX_ other);
+        b = SvU128x(self);
     }
     else {
-        int128_t b = SvU128(aTHX_ other);
+        b = SvU128(aTHX_ other);
+        a = SvU128x(self);
+    }
+    if ( may_die_on_overflow && (b > 128) ) overflow(aTHX_ left_b_error);
+    if (SvOK(rev))
+        RETVAL = newSVu128(aTHX_ a << b);
+    else {
         RETVAL = SvREFCNT_inc(self);
-        if (b < 128)
-            SvU128x(self) <<= b;
-        else
-            SvU128x(self) = 0;
+        SvU128x(self) = (a >> b);
     }
 OUTPUT:
     RETVAL
@@ -1354,27 +1373,24 @@ SV *mu128_right(self, other, rev)
     SV *self
     SV *other
     SV *rev
+PREINIT:
+    uint128_t a, b;
 CODE:
-    if (SvOK(rev)) {
-        uint128_t a, b;
-        if (SvTRUE(rev)) {
-            a = SvU128(aTHX_ other);
-            b = SvU128x(self);
-        }
-        else {
-            b = SvU128(aTHX_ other);
-            a = SvU128x(self);
-        }
-        RETVAL = newSVu128(aTHX_ (b < 128 ? (a >> b) : 0));
+    if (SvTRUE(rev)) {
+        a = SvU128(aTHX_ other);
+        b = SvU128x(self);
     }
     else {
-        uint128_t b = SvU128(aTHX_ other);
-        RETVAL = self;
-        SvREFCNT_inc(RETVAL);
-        if (b < 128)
-            SvU128x(self) >>= b;
-        else
-            SvU128x(self) = 0;
+        b = SvU128(aTHX_ other);
+        a = SvU128x(self);
+    }
+    if ( may_die_on_overflow && (b > 128) ) overflow(aTHX_ right_b_error);
+    if (SvOK(rev))
+        RETVAL = newSVu128(aTHX_ a >> b);
+    }
+    else {
+        RETVAL = SvREFCNT_inc(self);
+        SvU128x(self) = (a >> b);
     }
 OUTPUT:
     RETVAL
