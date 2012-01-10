@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    our $VERSION = '0.05';
+    our $VERSION = '0.06_01';
 
     require XSLoader;
     XSLoader::load('Math::Int128', $VERSION);
@@ -35,6 +35,8 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128
                                    native_to_uint128
                                    uint128_to_native )],
                      op    => [qw( int128_set
+                                   int128_inc
+                                   int128_dec
                                    int128_add
                                    int128_sub
                                    int128_mul
@@ -48,7 +50,10 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128
                                    int128_xor
                                    int128_left
                                    int128_right
+                                   int128_average
                                    uint128_set
+                                   uint128_inc
+                                   uint128_dec
                                    uint128_add
                                    uint128_sub
                                    uint128_mul
@@ -60,7 +65,8 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128
                                    uint128_or
                                    uint128_xor
                                    uint128_left
-                                   uint128_right )],
+                                   uint128_right
+                                   uint128_average)],
                    limits  => [qw( MAX_INT128
                                    MIN_INT128
                                    MAX_UINT128 )] );
@@ -178,7 +184,7 @@ provided.
 
 They are...
 
-  int128_add, int128_sub mul int128_div int128_mod int128_divmod
+  int128_inc int128_dec int128_add int128_sub mul int128_div int128_mod int128_divmod
   int128_and int128_or int128_xor int128_left int128_right int128_not
   int128_neg
 
@@ -190,6 +196,7 @@ For instance:
   my $b = int128("-2849503498690387383748");
   my $ret = int128();
   int128_mul($ret, $a, $b);
+  int128_inc($ret, $ret); # $ret = $ret + 1
   int128_add($ret, $ret, "12826738463");
   say $ret;
 
@@ -199,6 +206,10 @@ C<int128_divmod> returns both the result of the division and the remainder:
   my $rem = int128();
   int128_divmod($ret, $rem, $a, $b);
 
+=head1 TODO
+
+Support more operations as log2, pow, etc.
+
 =head1 SEE ALSO
 
 L<Math::Int64>, L<Math::GMP>, L<Math::GMPn>.
@@ -207,7 +218,8 @@ L<http://perlmonks.org/?node_id=886488>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007, 2009, 2011 by Salvador Fandino (sfandino@yahoo.com)
+Copyright (C) 2007, 2009, 2011, 2012 by Salvador Fandino
+(sfandino@yahoo.com)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,

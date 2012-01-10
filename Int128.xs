@@ -59,16 +59,16 @@ overflow(pTHX_ char *msg) {
 
 static char *out_of_bounds_error_s = "number is out of bounds for int128_t conversion";
 static char *out_of_bounds_error_u = "number is out of bounds for uint128_t conversion";
-static char *mul_error            = "multiplication overflows";
-static char *add_error            = "addition overflows";
-static char *sub_error            = "subtraction overflows";
-static char *inc_error            = "increment operation wraps";
-static char *dec_error            = "decrement operation wraps";
-static char *left_b_error         = "left-shift right operand is out of bounds";
-static char *left_error           = "left shift overflows";
-static char *right_b_error        = "right-shift right operand is out of bounds";
-static char *right_error          = "right shift overflows";
-
+static char *mul_error             = "multiplication overflows";
+static char *add_error             = "addition overflows";
+static char *sub_error             = "subtraction overflows";
+static char *inc_error             = "increment operation wraps";
+static char *dec_error             = "decrement operation wraps";
+static char *left_b_error          = "left-shift right operand is out of bounds";
+static char *left_error            = "left shift overflows";
+static char *right_b_error         = "right-shift right operand is out of bounds";
+static char *right_error           = "right shift overflows";
+static char *division_by_zero      = "Illegal division by zero";
 
 #include <strtoint128.h>
 
@@ -91,21 +91,23 @@ new_si128(pTHX) {
 
 static SV *
 newSVi128(pTHX_ int128_t i128) {
-    SV *sv;
+    HV *stash = (package_int128_stash ? package_int128_stash : gv_stashpvs("Math::Int128", 1));
     SV *si128 = new_si128(aTHX);
+    SV *sv;
     SvI128Y(si128) = i128;
     sv = newRV_noinc(si128);
-    sv_bless(sv, package_int128_stash);
+    sv_bless(sv, stash);
     return sv;
 }
 
 static SV *
 newSVu128(pTHX_ uint128_t u128) {
-    SV *sv;
+    HV *stash = (package_uint128_stash ? package_uint128_stash : gv_stashpvs("Math::UInt128", 1));
     SV *su128 = new_su128(aTHX);
+    SV *sv;
     SvI128Y(su128) = u128;
     sv = newRV_noinc(su128);
-    sv_bless(sv, package_uint128_stash);
+    sv_bless(sv, stash);
     return sv;
 }
 
@@ -135,153 +137,78 @@ SvSU128(pTHX_ SV *sv) {
 #define SvI128x(sv) SvI128Y(SvSI128(aTHX_ sv))
 #define SvU128x(sv) SvI128Y(SvSU128(aTHX_ sv))
 
-/* static const U32 my_pow10[] = { 1, */
-/*                                 10, */
-/*                                 100, */
-/*                                 1000, */
-/*                                 10000, */
-/*                                 100000, */
-/*                                 1000000, */
-/*                                 10000000, */
-/*                                 100000000, */
-/*                                 1000000000 }; */
-
-/* static uint128_t */
-/* atoui128(pTHX_ const char *pv, STRLEN len, char *type) { */
-/*     uint128_t u128 = 0; */
-/*     STRLEN i; */
-
-/*     if (len == 0) { */
-/*         if (ckWARN(WARN_NUMERIC)) */
-/*             Perl_warner(aTHX_ packWARN(WARN_NUMERIC), */
-/*                         "Argument isn't numeric in conversion to %s", type); */
-/*         return 0; */
-/*     } */
-
-/*     while (1) { */
-/*         U32 acu32 = 0; */
-/*         for (i = 0; i < 9; i++) { */
-/*             U32 c = *(pv++); */
-/*             if ((c >= '0') && (c <= '9')) */
-/*                 acu32 = acu32 * 10 + (c - '0'); */
-/*             else { */
-/*                 if (ckWARN(WARN_NUMERIC) && (len != i)) */
-/*                     Perl_warner(aTHX_ packWARN(WARN_NUMERIC), */
-/*                                 "Argument isn't numeric in conversion to %s", type); */
-/*                 return u128 * my_pow10[i] + acu32; */
-/*             } */
-/*         } */
-/*         u128 *= 1000000000; */
-/*         u128 += acu32; */
-/*         len -= 9; */
-/*     } */
-/* } */
-
-/* #define skip_zeros for(;len > 1 && *pv == '0'; pv++, len--); */
-
-/* static int128_t */
-/* atou128(pTHX_ SV *sv) { */
-/*     STRLEN len; */
-/*     const char *pv = SvPV_const(sv, len); */
-/*     if (len && (*pv == '+')) { */
-/*         pv++; len--; */
-/*     } */
-/*     skip_zeros; */
-/*     if ( (len > 39) || */
-/*          ((len == 39) && (strncmp(pv, "340282366920938463463374607431768211456", len) >= 0)) ) */
-/*         Perl_croak(aTHX_ "Integer overflow in conversion to uint128_t"); */
-/*     return atoui128(aTHX_ pv, len, "uint128_t"); */
-/* } */
-
-/* static int128_t */
-/* atoi128(pTHX_ SV *sv) { */
-/*     STRLEN len; */
-/*     const char *pv = SvPV_const(sv, len); */
-/*     if (len) { */
-/*         if (*pv == '+') { */
-/*             pv++; len--; */
-/*         } */
-/*         else if (*pv == '-') { */
-/*             int cmp; */
-/*             pv++; len--; */
-/*             skip_zeros; */
-/*             if (len >= 39) { */
-/*                 cmp = strcmp(pv, "170141183460469231731687303715884105728"); */
-/*                 if ((len > 39) || (cmp > 0)) */
-/*                     Perl_croak(aTHX_ "Integer overflow in conversion to int128_t"); */
-/*                 if (cmp == 0) */
-/*                     return (((int128_t)1) << 127); */
-/*             } */
-/*             return -atoui128(aTHX_ pv, len, "int128_t"); */
-/*         } */
-/*         skip_zeros; */
-/*         if ((len >= 39) && (strncmp(pv, "170141183460469231731687303715884105728", len) >= 0)) */
-/*             Perl_croak(aTHX_ "Integer overflow in conversion to int128_t"); */
-/*     } */
-/*     return atoui128(aTHX_ pv, len, "int128_t"); */
-/* } */
-
 static int128_t
 SvI128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
         if (si128 && SvOBJECT(si128)) {
-            GV *method;
             HV *stash = SvSTASH(si128);
-            char const * classname = HvNAME_get(stash);
-            if (strncmp(classname, "Math::", 6) == 0) {
-                int u;
-                if (classname[6] == 'U') {
-                    classname += 7;
-                    u = 1;
-                }
-                else {
-                    classname += 6;
-                    u = 0;
-                }
-                if (strncmp(classname, "Int", 3) == 0) {
-                    classname += 3;
-                    if (strcmp(classname, "128") == 0) {
-                        if (!SvPOK(si128) || (SvCUR(si128) != I128LEN))
-                            Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
-                        if (u) {
-                            int128_t u128 = SvU128Y(si128);
-                            if (may_die_on_overflow && (u128 > INT128_MAX))
-                                overflow(aTHX_ out_of_bounds_error_s);
-                            return u128;
-                        }
-                        return SvI128Y(si128);
-                    }
-                    if (strcmp(classname, "64") == 0) {
-                        if (u) {
-                            return SvU64(sv);
-                        }
-                        return SvI64(sv);
-                    }
-                }
+            if (stash == package_int128_stash) {
+                return SvI128Y(si128);
             }
-            method = gv_fetchmethod(stash, "as_int128");
-            if (method) {
-                SV *result;
-                int count;
-                dSP;
-                ENTER;
-                SAVETMPS;
-                PUSHSTACKi(PERLSI_MAGIC);
-                PUSHMARK(SP);
-                XPUSHs(sv);
-                PUTBACK;
-                count = perl_call_sv( (SV*)method, G_SCALAR );
-                SPAGAIN;
-                if (count != 1)
-                    Perl_croak(aTHX_ "internal error: method call returned %d values, 1 expected", count);
-                result = newSVsv(POPs);
-                PUTBACK;
-                POPSTACK;
-                SPAGAIN;
-                FREETMPS;
-                LEAVE;
-                return SvI128(aTHX_ sv_2mortal(result));
+            else if (stash == package_uint128_stash) {
+                int128_t u128 = SvU128Y(si128);
+                if (may_die_on_overflow && (u128 > INT128_MAX))
+                    overflow(aTHX_ out_of_bounds_error_s);
+                return u128;
+            }
+            else {
+                GV *method;
+                char const * classname = HvNAME_get(stash);
+                if (strncmp(classname, "Math::", 6) == 0) {
+                    int u;
+                    if (classname[6] == 'U') {
+                        classname += 7;
+                        u = 1;
+                    }
+                    else {
+                        classname += 6;
+                        u = 0;
+                    }
+                    if (strncmp(classname, "Int", 3) == 0) {
+                        classname += 3;
+                        if (strcmp(classname, "128") == 0) {
+                            if (!SvPOK(si128) || (SvCUR(si128) != I128LEN))
+                                Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
+                            if (u) {
+                                int128_t u128 = SvU128Y(si128);
+                                if (may_die_on_overflow && (u128 > INT128_MAX))
+                                    overflow(aTHX_ out_of_bounds_error_s);
+                                return u128;
+                            }
+                            return SvI128Y(si128);
+                        }
+                        if (strcmp(classname, "64") == 0) {
+                            if (u) {
+                                return SvU64(sv);
+                            }
+                            return SvI64(sv);
+                        }
+                    }
+                }
+                method = gv_fetchmethod(stash, "as_int128");
+                if (method) {
+                    SV *result;
+                    int count;
+                    dSP;
+                    ENTER;
+                    SAVETMPS;
+                    PUSHSTACKi(PERLSI_MAGIC);
+                    PUSHMARK(SP);
+                    XPUSHs(sv);
+                    PUTBACK;
+                    count = perl_call_sv( (SV*)method, G_SCALAR );
+                    SPAGAIN;
+                    if (count != 1)
+                        Perl_croak(aTHX_ "internal error: method call returned %d values, 1 expected", count);
+                    result = newSVsv(POPs);
+                    PUTBACK;
+                    POPSTACK;
+                    SPAGAIN;
+                    FREETMPS;
+                    LEAVE;
+                    return SvI128(aTHX_ sv_2mortal(result));
+                }
             }
         }
     }
@@ -307,68 +234,77 @@ SvU128(pTHX_ SV *sv) {
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
         if (su128 && SvOBJECT(su128)) {
-            GV *method;
             HV *stash = SvSTASH(su128);
-            char const * classname = HvNAME_get(stash);
-            if (strncmp(classname, "Math::", 6) == 0) {
-                int u;
-                if (classname[6] == 'U') {
-                    classname += 7;
-                    u = 1;
-                }
-                else {
-                    classname += 6;
-                    u = 0;
-                }
-                if (strncmp(classname, "Int", 3) == 0) {
-                    classname += 3;
-                    if (strcmp(classname, "128") == 0) {
-                        if (!SvPOK(su128) || (SvCUR(su128) != I128LEN))
-                            Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
-                        if (u)
-                            return SvU128Y(su128);
-                        else {
-                            int128_t i128 = SvI128Y(su128);
-                            if (may_die_on_overflow && (i128 < 0)) overflow(aTHX_ out_of_bounds_error_u);
-                            return i128;
+            if (stash == package_uint128_stash)
+                return SvU128Y(su128);
+            else if (stash == package_int128_stash) {
+                int128_t i128 = SvI128Y(su128);
+                if (may_die_on_overflow && (i128 < 0))
+                    overflow(aTHX_ out_of_bounds_error_u);
+                return i128;
+            }
+            else {
+                GV *method;
+                char const * classname = HvNAME_get(stash);
+                if (strncmp(classname, "Math::", 6) == 0) {
+                    int u;
+                    if (classname[6] == 'U') {
+                        classname += 7;
+                        u = 1;
+                    }
+                    else {
+                        classname += 6;
+                        u = 0;
+                    }
+                    if (strncmp(classname, "Int", 3) == 0) {
+                        classname += 3;
+                        if (strcmp(classname, "128") == 0) {
+                            if (!SvPOK(su128) || (SvCUR(su128) != I128LEN))
+                                Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
+                            if (u)
+                                return SvU128Y(su128);
+                            else {
+                                int128_t i128 = SvI128Y(su128);
+                                if (may_die_on_overflow && (i128 < 0)) overflow(aTHX_ out_of_bounds_error_u);
+                                return i128;
+                            }
+                        }
+                        if (strcmp(classname, "64") == 0) {
+                            if (u) {
+                                return SvU64(sv);
+                            }
+                            else {
+                                int64_t i64 = SvI64(sv);
+                                if (may_die_on_overflow && (i64 < 0)) overflow(aTHX_ out_of_bounds_error_u);
+                                return i64;
+                            }
                         }
                     }
-                    if (strcmp(classname, "64") == 0) {
-                        if (u) {
-                            return SvU64(sv);
-                        }
-                        else {
-                            int64_t i64 = SvI64(sv);
-                            if (may_die_on_overflow && (i64 < 0)) overflow(aTHX_ out_of_bounds_error_u);
-                            return i64;
-                        }
-                    }
+                }
+                method = gv_fetchmethod(stash, "as_uint128");
+                if (method) {
+                    SV *result;
+                    int count;
+                    dSP;
+                    ENTER;
+                    SAVETMPS;
+                    PUSHSTACKi(PERLSI_MAGIC);
+                    PUSHMARK(SP);
+                    XPUSHs(sv);
+                    PUTBACK;
+                    count = perl_call_sv( (SV*)method, G_SCALAR );
+                    SPAGAIN;
+                    if (count != 1)
+                        Perl_croak(aTHX_ "internal error: method call returned %d values, 1 expected", count);
+                    result = newSVsv(POPs);
+                    PUTBACK;
+                    POPSTACK;
+                    SPAGAIN;
+                    FREETMPS;
+                    LEAVE;
+                    return SvU128(aTHX_ sv_2mortal(result));
                 }
             }
-            method = gv_fetchmethod(stash, "as_uint128");
-            if (method) {
-                SV *result;
-                int count;
-                dSP;
-                ENTER;
-                SAVETMPS;
-                PUSHSTACKi(PERLSI_MAGIC);
-                PUSHMARK(SP);
-                XPUSHs(sv);
-                PUTBACK;
-                count = perl_call_sv( (SV*)method, G_SCALAR );
-                SPAGAIN;
-                if (count != 1)
-                    Perl_croak(aTHX_ "internal error: method call returned %d values, 1 expected", count);
-                result = newSVsv(POPs);
-                PUTBACK;
-                POPSTACK;
-                SPAGAIN;
-                FREETMPS;
-                LEAVE;
-                return SvU128(aTHX_ sv_2mortal(result));
-            }
-
         }
     }
     else {
@@ -460,9 +396,15 @@ MODULE = Math::Int128		PACKAGE = Math::Int128			PREFIX=miu128_
 
 BOOT:
     may_die_on_overflow = 0;
-    package_int128_stash = gv_stashsv(newSVpv("Math::Int128", 0), 1);
-    package_uint128_stash = gv_stashsv(newSVpv("Math::UInt128", 0), 1);
+    package_int128_stash = gv_stashpvs("Math::Int128", 1);
+    package_uint128_stash = gv_stashpvs("Math::UInt128", 1);
     MATH_INT64_BOOT;
+
+void
+CLONE()
+CODE:
+    package_int128_stash = 0;
+    package_uint128_stash = 0;
 
 void
 miu128__set_may_die_on_overflow(v)
@@ -850,13 +792,13 @@ CODE:
             down = SvI128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = newSVi128(aTHX_ up/down);
     }
     else {
         down = SvI128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvI128x(self) /= down;
@@ -883,13 +825,13 @@ CODE:
             down = SvI128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = newSVi128(aTHX_ up % down);
     }
     else {
         down = SvI128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvI128x(self) %= down;
@@ -929,7 +871,8 @@ SV *mi128_right(self, other, rev)
     SV *rev
 PREINIT:
     int128_t a;
-    uint128_t b;    
+    uint128_t b;
+    int128_t r;
 CODE:
     if (SvTRUE(rev)) {
         a = SvI128(aTHX_ other);
@@ -939,12 +882,12 @@ CODE:
         b = SvU128(aTHX_ other);
         a = SvI128x(self);
     }
-    if (may_die_on_overflow && (b > 128)) overflow(aTHX_ right_error);
+    r = (b > 127 ? (a < 0 ? -1 : 0) : a >> b);
     if (SvOK(rev))
-        RETVAL = newSVi128(aTHX_ a >> b);
+        RETVAL = newSVi128(aTHX_ r);
     else {
         RETVAL = SvREFCNT_inc(self);
-        SvI128x(self) = (a >> b);
+        SvI128x(self) = r;
     }
 OUTPUT:
     RETVAL
@@ -1201,22 +1144,17 @@ mu128_add(self, other, rev)
     SV *self
     SV *other
     SV *rev
+PREINIT:
+    uint128_t a = SvU128x(self);
+    uint128_t b = SvU128(aTHX_ other);
 CODE:
-    /*
-    fprintf(stderr, "self: ");
-    sv_dump(self);
-    fprintf(stderr, "other: ");
-    sv_dump(other);
-    fprintf(stderr, "rev: ");
-    sv_dump(rev);
-    fprintf(stderr, "\n");
-    */
+    if (may_die_on_overflow && (UINT128_MAX - a < b)) overflow(aTHX_ add_error);
     if (SvOK(rev)) 
-        RETVAL = newSVu128(aTHX_ SvU128x(self) + SvU128(aTHX_ other));
+        RETVAL = newSVu128(aTHX_ a + b);
     else {
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
-        SvU128x(self) += SvU128(aTHX_ other);
+        SvU128x(self) = a + b;
     }
 OUTPUT:
     RETVAL
@@ -1230,12 +1168,12 @@ PREINIT:
     uint128_t a, b;
 CODE:
     if (SvTRUE(rev)) {
-        a = SvU64(aTHX_ other);
-        b = SvU64x(self);
+        a = SvU128(aTHX_ other);
+        b = SvU128x(self);
     }
     else {
-        a = SvU64x(self);
-        b = SvU64(aTHX_ other);
+        a = SvU128x(self);
+        b = SvU128(aTHX_ other);
     }
     if (may_die_on_overflow && (b > a)) overflow(aTHX_ sub_error);
     if (SvOK(rev))
@@ -1297,13 +1235,13 @@ CODE:
             down = SvU128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = newSVu128(aTHX_ up/down);
     }
     else {
         down = SvU128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvU128x(self) /= down;
@@ -1330,13 +1268,13 @@ CODE:
             down = SvU128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = newSVu128(aTHX_ up % down);
     }
     else {
         down = SvU128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ "Illegal division by zero");
+            Perl_croak(aTHX_ division_by_zero);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvU128x(self) %= down;
@@ -1387,7 +1325,6 @@ CODE:
     if ( may_die_on_overflow && (b > 128) ) overflow(aTHX_ right_b_error);
     if (SvOK(rev))
         RETVAL = newSVu128(aTHX_ a >> b);
-    }
     else {
         RETVAL = SvREFCNT_inc(self);
         SvU128x(self) = (a >> b);
@@ -1626,232 +1563,358 @@ CODE:
     SvI128x(self) = (a ? SvI128(aTHX_ a) : 0);
 
 void
+mi128_int128_inc(self, a)
+    SV *self
+    int128_t a
+CODE:
+    if ( may_die_on_overflow && (a == INT128_MAX)) overflow(aTHX_ inc_error);
+    SvI128x(self) = a + 1;
+
+void
+mi128_int128_dec(self, a)
+    SV *self
+    int128_t a
+CODE:
+    if ( may_die_on_overflow && (a == INT128_MIN)) overflow(aTHX_ dec_error);
+    SvI128x(self) = a - 1;
+
+void
 mi128_int128_add(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    int128_t a
+    int128_t b
 CODE:
-    SvI128x(self) = SvI128(aTHX_ a) + SvI128(aTHX_ b);
+    if ( may_die_on_overflow &&
+         ( a > 0
+           ? ( (b > 0) && (INT128_MAX - a < b) )
+           : ( (b < 0) && (INT128_MIN - a > b) ) ) ) overflow(aTHX_ add_error);
+    SvI128x(self) = a + b;
 
 void
 mi128_int128_sub(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    int128_t a
+    int128_t b
 CODE:
-    SvI128x(self) = SvI128(aTHX_ a) - SvI128(aTHX_ b);
+    if ( may_die_on_overflow &&
+         ( a > 0
+           ? ( (b < 0) && (a - INT128_MAX > b) )
+           : ( (b > 0) && (a - INT128_MIN < b) ) ) ) overflow(aTHX_ sub_error);
+    SvI128x(self) = a - b;
 
 void
-mi128_int128_mul(self, a, b)
+mi128_int128_mul(self, a1, b1)
     SV *self
-    SV *a
-    SV *b
+    int128_t a1
+    int128_t b1
 CODE:
-    SvI128x(self) = SvI128(aTHX_ a) * SvI128(aTHX_ b);
+    if (may_die_on_overflow) {
+        int neg = 0;
+        uint128_t a, b, rl, rh;
+        if (a1 < 0) {
+            a = -a1;
+            neg ^= 1;
+        }
+        else a = a1;
+        if (b1 < 0) {
+            b = -b1;
+            neg ^= 1;
+        }
+        else b = b1;
+        if (a < b) {
+            uint128_t tmp = a;
+            a = b; b = tmp;
+        }
+        if (b > UINT64_MAX) overflow(aTHX_ mul_error);
+        else {
+            rl = (a & UINT64_MAX) * b;
+            rh = (a >> 64) * b + (rl >> 64);
+            if (rh > UINT64_MAX) overflow(aTHX_ mul_error);
+        }
+        if (a * b > (neg ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX)) overflow(aTHX_ mul_error);
+    }
+    SvI128x(self) = a1 * b1;
 
 void
 mi128_int128_div(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    int128_t a
+    int128_t b
 CODE:
-    SvI128x(self) = SvI128(aTHX_ a) / SvI128(aTHX_ b);
+    if (!b) Perl_croak(aTHX_ division_by_zero);
+    SvI128x(self) = a / b;
 
 void
 mi128_int128_mod(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    int128_t a
+    int128_t b
 CODE:
-    SvI128x(self) = SvI128(aTHX_ a) % SvI128(aTHX_ b);
+    if (!b) Perl_croak(aTHX_ division_by_zero);
+    SvI128x(self) = a % b;
 
 void
 mi128_int128_divmod(self, rem, a, b)
     SV *self
     SV *rem
-    SV *a
-    SV *b
+    int128_t a
+    int128_t b
 PREINIT:
-    int128_t ai, bi, di, ri;
+    int128_t d;
 CODE:
-    ai = SvI128(aTHX_ a);
-    bi = SvI128(aTHX_ b);
-    di = ai / bi;
-    ri = ai - bi * di;
-    SvI128x(self) = di;
-    SvI128x(rem) = ri;
+    if (!b) Perl_croak(aTHX_ division_by_zero);
+    SvI128x(self) = d = a / b;
+    SvI128x(rem) = a - b * d;
 
 void
 mi128_int128_not(self, a)
     SV *self
-    SV *a
+    int128_t a
 CODE:
-     SvI128x(self) = ~SvI128(aTHX_ a);
+    SvI128x(self) = ~a;
 
 void
 mi128_int128_neg(self, a)
-     SV *self
-     SV *a
+    SV *self
+    int128_t a
 CODE:
-     SvI128x(self) = -SvI128(aTHX_ a);
+    SvI128x(self) = -a;
 
 void
 mi128_int128_and(self, a, b)
-     SV *self
-     SV *a
-     SV *b
+    SV *self
+    int128_t a
+    int128_t b
 CODE:
-     SvI128x(self) = SvI128(aTHX_ a) & SvI128(aTHX_ b);
+    SvI128x(self) = a & b;
 
 void
 mi128_int128_or(self, a, b)
-     SV *self
-     SV *a
-     SV *b
+    SV *self
+    int128_t a
+    int128_t b
 CODE:
-     SvI128x(self) = SvI128(aTHX_ a) | SvI128(aTHX_ b);
+    SvI128x(self) = a | b;
 
 void
 mi128_int128_xor(self, a, b)
-     SV *self
-     SV *a
-     SV *b
+    SV *self
+    int128_t a
+    int128_t b
 CODE:
-     SvI128x(self) = SvI128(aTHX_ a) ^ SvI128(aTHX_ b);
+    SvI128x(self) = a ^ b;
 
 void
 mi128_int128_left(self, a, b)
-     SV *self
-     SV *a
-     UV b
+    SV *self
+    int128_t a
+    uint128_t b
 CODE:
-     SvI128x(self) = SvI128(aTHX_ a) << b;
+    SvI128x(self) = (b > 127 ? 0 : a << b);
 
 void
 mi128_int128_right(self, a, b)
-     SV *self
-     SV *a
-     UV b
+    SV *self
+    int128_t a
+    uint128_t b
 CODE:
-     SvI128x(self) = SvI128(aTHX_ a) >> b;
+    SvI128x(self) = (b > 127 ? (a < 0 ? - 1 : 0) : a >> b);
+                  
+void
+mi128_int128_average(self, a, b)
+    SV *self
+    int128_t a
+    int128_t b
+CODE:
+    SvI128x(self) = (a & b) + ((a ^ b) / 2);
+
+void
+mi128_int128_min(self, a, b)
+    SV *self
+    int128_t a
+    int128_t b
+CODE:
+    SvI128x(self) = (a > b ? b : a);
+
+void
+mi128_int128_max(self, a, b)
+    SV *self
+    int128_t a
+    int128_t b
+CODE:
+    SvI128x(self) = (a > b ? a : b);
 
 
 MODULE = Math::Int128		PACKAGE = Math::Int128		PREFIX=mu128_
 PROTOTYPES: DISABLE
 
 void
-mu128_uint128_set(self, a=NULL)
+mu128_uint128_set(self, a=0)
     SV *self
-    SV *a
+    uint128_t a;
 CODE:
-    SvU128x(self) = (a ? SvU128(aTHX_ a) : 0);
+    SvU128x(self) = a;
+
+void
+mu128_uint128_inc(self, a)
+    SV *self
+    uint128_t a
+CODE:
+    if ( may_die_on_overflow && (a == INT128_MAX)) overflow(aTHX_ inc_error);
+    SvU128x(self) = a + 1;
+
+void
+mu128_uint128_dec(self, a)
+    SV *self
+    uint128_t a
+CODE:
+    if ( may_die_on_overflow && (a == 0)) overflow(aTHX_ dec_error);
+    SvU128x(self) = a - 1;
 
 void
 mu128_uint128_add(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    uint128_t a
+    uint128_t b
 CODE:
-    SvU128x(self) = SvU128(aTHX_ a) + SvU128(aTHX_ b);
+    if (may_die_on_overflow && (UINT128_MAX - a < b)) overflow(aTHX_ add_error);
+    SvU128x(self) = a + b;
 
 void
 mu128_uint128_sub(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    uint128_t a
+    uint128_t b
 CODE:
-    SvU128x(self) = SvU128(aTHX_ a) - SvU128(aTHX_ b);
+    if (may_die_on_overflow && (b > a)) overflow(aTHX_ sub_error);
+    SvU128x(self) = a - b;
 
 void
 mu128_uint128_mul(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    uint128_t a
+    uint128_t b
 CODE:
-    SvU128x(self) = SvU128(aTHX_ a) * SvU128(aTHX_ b);
+    if (may_die_on_overflow) {
+        if (a < b) {
+            uint128_t tmp = a;
+            a = b; b = tmp;
+        }
+        if (b > UINT64_MAX) overflow(aTHX_ mul_error);
+        else {
+            uint128_t rl, rh;
+            rl = (a & UINT64_MAX) * b;
+            rh = (a >> 64) * b + (rl >> 64);
+            if (rh > UINT64_MAX) overflow(aTHX_ mul_error);
+        }
+    }
+    SvU128x(self) = a * b;
 
 void
 mu128_uint128_div(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    uint128_t a
+    uint128_t b
 CODE:
-    SvU128x(self) = SvU128(aTHX_ a) / SvU128(aTHX_ b);
+    if (!b) Perl_croak(aTHX_ division_by_zero);
+    SvU128x(self) = a / b;
 
 void
 mu128_uint128_mod(self, a, b)
     SV *self
-    SV *a
-    SV *b
+    uint128_t a
+    uint128_t b
 CODE:
-    SvU128x(self) = SvU128(aTHX_ a) % SvU128(aTHX_ b);
+    if (!b) Perl_croak(aTHX_ division_by_zero);
+    SvU128x(self) = a % b;
 
 void
 mu128_uint128_divmod(self, rem, a, b)
     SV *self
     SV *rem
-    SV *a
-    SV *b
+    uint128_t a
+    uint128_t b
 PREINIT:
-    uint128_t ai, bi, di, ri;
+    uint128_t d;
 CODE:
-    ai = SvU128(aTHX_ a);
-    bi = SvU128(aTHX_ b);
-    di = ai / bi;
-    ri = ai - bi * di;
-    SvU128x(self) = di;
-    SvU128x(rem) = ri;
+    if (!b) Perl_croak(aTHX_ division_by_zero);
+    SvU128x(self) = d = a / b;
+    SvU128x(rem) = a - b * d;
 
 void
 mu128_uint128_not(self, a)
     SV *self
-    SV *a
+    uint128_t a
 CODE:
-     SvU128x(self) = ~SvU128(aTHX_ a);
+    SvU128x(self) = ~a;
 
 void
 mu128_uint128_neg(self, a)
-     SV *self
-     SV *a
+    SV *self
+    uint128_t a
 CODE:
-     SvU128x(self) = -SvU128(aTHX_ a);
+    SvU128x(self) = -a;
 
 void
 mu128_uint128_and(self, a, b)
-     SV *self
-     SV *a
-     SV *b
+    SV *self
+    uint128_t a
+    uint128_t b
 CODE:
-     SvU128x(self) = SvU128(aTHX_ a) & SvU128(aTHX_ b);
+    SvU128x(self) = a & b;
 
 void
 mu128_uint128_or(self, a, b)
-     SV *self
-     SV *a
-     SV *b
+    SV *self
+    uint128_t a
+    uint128_t b
 CODE:
-     SvU128x(self) = SvU128(aTHX_ a) | SvU128(aTHX_ b);
+    SvU128x(self) = a | b;
 
 void
 mu128_uint128_xor(self, a, b)
-     SV *self
-     SV *a
-     SV *b
+    SV *self
+    uint128_t a
+    uint128_t b
 CODE:
-     SvU128x(self) = SvU128(aTHX_ a) ^ SvU128(aTHX_ b);
+    SvU128x(self) = a ^ b;
 
 void
 mu128_uint128_left(self, a, b)
-     SV *self
-     SV *a
-     UV b
+    SV *self
+    uint128_t a
+    uint128_t b
 CODE:
-     SvU128x(self) = SvU128(aTHX_ a) << b;
+    SvU128x(self) = (b > 127 ? 0 : a << b);
 
 void
 mu128_uint128_right(self, a, b)
-     SV *self
-     SV *a
-     UV b
+    SV *self
+    uint128_t a
+    uint128_t b
 CODE:
-     SvU128x(self) = SvU128(aTHX_ a) >> b;
+    SvU128x(self) = (b > 127 ? 0 : a >> b);
+
+void
+mu128_uint128_average(self, a, b)
+    SV *self
+    uint128_t a
+    uint128_t b
+CODE:
+    SvU128x(self) = (a & b) + ((a ^ b) >> 1);
+
+void
+mi128_uint128_min(self, a, b)
+    SV *self
+    uint128_t a
+    uint128_t b
+CODE:
+    SvU128x(self) = (a > b ? b : a);
+
+void
+mi128_uint128_max(self, a, b)
+    SV *self
+    uint128_t a
+    uint128_t b
+CODE:
+    SvU128x(self) = (a > b ? a : b);
