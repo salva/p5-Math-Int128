@@ -1,8 +1,16 @@
+benchmarks/bm.pl
+benchmarks/mod128.pl
+benchmarks/syp.pl
 Changes
 Int128.xs
+lib/Math/Int128.pm
+lib/Math/Int128/die_on_overflow.pm
 Makefile.PL
 MANIFEST
+perl_math_int64.c
+perl_math_int64.h
 ppport.h
 README
+strtoint128.h
 t/Math-Int128.t
-lib/Math/Int128.pm
+typemap
