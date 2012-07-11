@@ -1,5 +1,5 @@
 /*
- * Converts a string into a int64_t
+ * Converts a string into a int128_t
  *
  * based on OpenBSD: strtoll.c,v 1.6 2005/11/10 10:00:17 espie Exp $
  */
