@@ -22,4 +22,11 @@ unless ($cc_version =~ /cc\s+\([^)]*\)\s+4\.(\d+)/i and $1 >= 4) {
     die "This module requires version 4.4 or above of the GCC compiler.\nAborting!\n\n"
 }
 
+sub MY::postamble {
+    return <<'MAKE_FRAG'
 
+c_api.h: c_api.decl
+	make_perl_module_c_api module_name=$(NAME) module_version=$(VERSION)
+MAKE_FRAG
+
+}
