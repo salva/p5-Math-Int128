@@ -155,7 +155,7 @@ SvI128(pTHX_ SV *sv) {
             else {
                 GV *method;
                 char const * classname = HvNAME_get(stash);
-                if (strncmp(classname, "Math::", 6) == 0) {
+                if (memcmp(classname, "Math::", 6) == 0) {
                     int u;
                     if (classname[6] == 'U') {
                         classname += 7;
@@ -165,9 +165,9 @@ SvI128(pTHX_ SV *sv) {
                         classname += 6;
                         u = 0;
                     }
-                    if (strncmp(classname, "Int", 3) == 0) {
+                    if (memcmp(classname, "Int", 3) == 0) {
                         classname += 3;
-                        if (strcmp(classname, "128") == 0) {
+                        if (memcmp(classname, "128", 4) == 0) {
                             if (!SvPOK(si128) || (SvCUR(si128) != I128LEN))
                                 Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
                             if (u) {
@@ -178,7 +178,7 @@ SvI128(pTHX_ SV *sv) {
                             }
                             return SvI128Y(si128);
                         }
-                        if (strcmp(classname, "64") == 0) {
+                        if (memcmp(classname, "64", 3) == 0) {
                             if (u) {
                                 return SvU64(sv);
                             }
@@ -246,7 +246,7 @@ SvU128(pTHX_ SV *sv) {
             else {
                 GV *method;
                 char const * classname = HvNAME_get(stash);
-                if (strncmp(classname, "Math::", 6) == 0) {
+                if (memcmp(classname, "Math::", 6) == 0) {
                     int u;
                     if (classname[6] == 'U') {
                         classname += 7;
@@ -256,9 +256,9 @@ SvU128(pTHX_ SV *sv) {
                         classname += 6;
                         u = 0;
                     }
-                    if (strncmp(classname, "Int", 3) == 0) {
+                    if (memcmp(classname, "Int", 3) == 0) {
                         classname += 3;
-                        if (strcmp(classname, "128") == 0) {
+                        if (memcmp(classname, "128", 4) == 0) {
                             if (!SvPOK(su128) || (SvCUR(su128) != I128LEN))
                                 Perl_croak(aTHX_ "Wrong internal representation for %s object", HvNAME_get(stash));
                             if (u)
@@ -269,7 +269,7 @@ SvU128(pTHX_ SV *sv) {
                                 return i128;
                             }
                         }
-                        if (strcmp(classname, "64") == 0) {
+                        if (memcmp(classname, "64", 3) == 0) {
                             if (u) {
                                 return SvU64(sv);
                             }
