@@ -162,6 +162,24 @@ newSVu128(pTHX_ uint128_t u128) {
     return sv;
 }
 
+static int
+SvI128OK(pTHX_ SV *sv) {
+    if (SvROK(sv)) {
+        SV *si128 = SvRV(sv);
+        return (si128 && (SvTYPE(si128) >= SVt_I128) && sv_isa(sv, "Math::Int128"));
+    }
+    return 0;
+}
+
+static int
+SvU128OK(pTHX_ SV *sv) {
+    if (SvROK(sv)) {
+        SV *su128 = SvRV(sv);
+        return (su128 && (SvTYPE(su128) >= SVt_I128) && sv_isa(sv, "Math::UInt128"));
+    }
+    return 0;
+}
+
 #define SvI128X(sv) (SvI128Y(SvRV(sv)))
 #define SvU128X(sv) (SvI128Y(SvRV(sv)))
 
