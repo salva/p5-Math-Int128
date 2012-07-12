@@ -469,12 +469,14 @@ u128_to_hex(uint128_t i128, char *to) {
     }
 }
 
+#include "c_api.h"
 
 MODULE = Math::Int128		PACKAGE = Math::Int128			PREFIX=miu128_	
 
 BOOT:
     init_stash_cache(aTHX);
-    PERL_MATH_INT64_LOAD;
+    PERL_MATH_INT64_LOAD_OR_CROAK;
+    INIT_C_API;
 
 void
 CLONE()
