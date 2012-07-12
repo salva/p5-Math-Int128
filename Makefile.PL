@@ -22,7 +22,9 @@ unless ($cc_version =~ /cc\s+\([^)]*\)\s+4\.(\d+)/i and $1 >= 4) {
     die "This module requires version 4.4 or above of the GCC compiler.\nAborting!\n\n"
 }
 
-sub MY::postamble {
+package MY;
+
+sub postamble {
     my $self = shift;
     my $author = $self->{AUTHOR};
     $author = join(', ', @$author) if ref $author;
@@ -34,4 +36,10 @@ c_api.h: c_api.decl
 	make_perl_module_c_api module_name=\$(NAME) module_version=\$(VERSION) author='$author'
 MAKE_FRAG
 
+}
+
+sub init_dirscan {
+    my $self = shift;
+    $self->SUPER::init_dirscan(@_);
+    push @{$self->{H}}, 'c_api.h' unless grep $_ eq 'c_api.h', @{$self->{H}};
 }
