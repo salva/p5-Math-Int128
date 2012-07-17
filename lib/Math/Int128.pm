@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    our $VERSION = '0.06_03';
+    our $VERSION = '0.06_04';
 
     require XSLoader;
     XSLoader::load('Math::Int128', $VERSION);
@@ -142,12 +142,6 @@ use overload ( '+' => \&_add,
                fallback => 1 );
 
 
-
-
-sub as_int64 {
-    
-}
-
 1;
 
 __END__
@@ -205,6 +199,14 @@ C<int128_divmod> returns both the result of the division and the remainder:
   my $ret = int128();
   my $rem = int128();
   int128_divmod($ret, $rem, $a, $b);
+
+=head1 C API
+
+The module provides a C API that allows to wrap/unwrap int128_t and
+uint128_t values from other modules written in C/XS.
+
+It is identical to that provided by L<Math::Int64> so read the
+documentation there in order to know how to use it.
 
 =head1 TODO
 
