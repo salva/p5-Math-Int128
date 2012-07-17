@@ -14,7 +14,7 @@ my $mm = WriteMakefile(NAME          => 'Math::Int128',
                        OBJECT        => '$(O_FILES)',
                       );
 
-my $cc = (grep defined, $mm->{CC}, $onfig{cc}, 'cc')[0];
+my $cc = (grep defined, $mm->{CC}, $Config{cc}, 'cc')[0];
 
 my $cc_version = `$cc --version`;
 unless ($cc_version =~ /cc\s+\([^)]*\)\s+4\.(\d+)/i and $1 >= 4) {
