@@ -212,6 +212,27 @@ documentation there in order to know how to use it.
 
 Support more operations as log2, pow, etc.
 
+=head1 BUGS AND SUPPORT
+
+The C API feature is experimental.
+
+This module requires 128bit integer support from the C
+compiler. Currently only gcc 4.4 and later are supported. If you have
+a different compiler that also supports 128bit integers get in touch
+with me in order to have it supported.
+
+You can send me bug reports by email to the address that appears below
+or use the CPAN RT bugtracking system available at
+L<http://rt.cpan.org>.
+
+The source for the development version of the module is hosted at
+GitHub: L<https://github.com/salva/p5-Math-Int128>.
+
+=head2 My wishlist
+
+If you like this module and you're feeling generous, take a look at my
+Amazon Wish List: L<http://amzn.com/w/1WU1P6IR5QZ42>
+
 =head1 SEE ALSO
 
 L<Math::Int64>, L<Math::GMP>, L<Math::GMPn>.
