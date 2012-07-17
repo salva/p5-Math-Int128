@@ -1,7 +1,14 @@
 Revision history for Perl extension Math::Int128.
 
-0.06_01
+0.06_04  Jul 17, 2012
+      - add support for C API
+      - stash caching handling was broken on threaded perls
+      - improve die_on_overflow handling
 
+0.06_03  Jan 11, 2012
+      - add die_on_overflow feature
+      - add support for int64_t integers via Math::Int64 
+      
 0.05  Apr 24, 2011
       - support for gcc 4.4 and 4.5 contributed by KMX
 
