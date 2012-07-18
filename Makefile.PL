@@ -35,7 +35,6 @@ sub postamble {
 c_api.h: c_api.decl
 	make_perl_module_c_api module_name=\$(NAME) module_version=\$(VERSION) author='$author'
 MAKE_FRAG
-
 }
 
 sub init_dirscan {
