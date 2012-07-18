@@ -33,7 +33,9 @@ module_c_end = <<FRAG
 
 int
 perl_math_int128_load(int required_version) {
-    sv_setpv_mg(ERRSV, "Unable to load Math::Int128 C API: your compiler does not support 128bit integers");
+    dTHX;
+    sv_setpv(ERRSV, "Unable to load Math::Int128 C API: your compiler does not support 128bit integers");
+    SvSETMAGIC(ERRSV);
     return 0;
 }
 
