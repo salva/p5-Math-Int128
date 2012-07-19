@@ -1,6 +1,9 @@
 Revision history for Perl extension Math::Int128.
 
-0.06_05
+
+
+0.06_05  Jul 19, 2012
+      - stash caching code was broken on non threaded perls
       - several errors on C API corrected
 
 0.06_04  Jul 17, 2012

@@ -94,7 +94,7 @@ static void init_stash_cache(pTHX) {
 
 static void init_stash_cache(pTHX) {
     int128_stash = get_int128_stash_uncached();
-    uint128_stash = uget_int128_stash_uncached();
+    uint128_stash = get_uint128_stash_uncached();
 }
 
 #  endif
