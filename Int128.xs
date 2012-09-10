@@ -148,6 +148,7 @@ newSVi128(pTHX_ int128_t i128) {
     SvI128Y(si128) = i128;
     sv = newRV_noinc(si128);
     sv_bless(sv, stash);
+    SvREADONLY_on(si128);
     return sv;
 }
 
@@ -159,6 +160,7 @@ newSVu128(pTHX_ uint128_t u128) {
     SvI128Y(su128) = u128;
     sv = newRV_noinc(su128);
     sv_bless(sv, stash);
+    SvREADONLY_on(su128);
     return sv;
 }
 
@@ -185,7 +187,7 @@ SvU128OK(pTHX_ SV *sv) {
 
 static SV *
 SvSI128(pTHX_ SV *sv) {
-    if (SvRV(sv)) {
+    if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
         if (SvPOK(si128) && (SvCUR(si128) == I128LEN))
             return si128;
@@ -195,7 +197,7 @@ SvSI128(pTHX_ SV *sv) {
 
 static SV *
 SvSU128(pTHX_ SV *sv) {
-    if (SvRV(sv)) {
+    if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
         if (SvPOK(su128) && (SvCUR(su128) == I128LEN))
             return su128;
@@ -592,7 +594,7 @@ CODE:
     SvCUR_set(RETVAL, I128LEN);
     pv = SvPVX(RETVAL);
     pv[I128LEN] = '\0';
-    for (i = I128LEN; i >= 0; i--, i128 >>= 8)
+    for (i = I128LEN - 1; i >= 0; i--, i128 >>= 8)
         pv[i] = i128;
 OUTPUT:
     RETVAL
@@ -610,7 +612,7 @@ CODE:
     SvCUR_set(RETVAL, I128LEN);
     pv = SvPVX(RETVAL);
     pv[I128LEN] = '\0';
-    for (i = I128LEN; i >= 0; i--, u128 >>= 8)
+    for (i = I128LEN - 1; i >= 0; i--, u128 >>= 8)
         pv[i] = u128;
 OUTPUT:
     RETVAL
