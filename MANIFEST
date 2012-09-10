@@ -21,3 +21,5 @@ strtoint128.h
 t/Math-Int128.t
 t/pods.t
 typemap
+t/Math-Int128.t
+t/Math-UInt128.t
