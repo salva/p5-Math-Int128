@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
-0.06_07
+0.06_07  Nov 5, 2012
+      - gcc version detection was to picky (bug report by Peter John
+        Acklam)
       - int128_to_net and uint128_to_net were broken
       - add tests addapted from Math::Int64 module
       - mark internal representation of int128 wrappers as readonly in
