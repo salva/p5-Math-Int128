@@ -6,6 +6,8 @@
 #include "perl.h"
 #include "XSUB.h"
 #include "ppport.h"
+
+#include <stdint.h>
 #include "perl_math_int64.h"
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ >= 4 && __GNUC_MINOR__ < 6
@@ -18,26 +20,6 @@ typedef unsigned int uint128_t __attribute__ ((__mode__ (TI)));
 
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
-
-#endif
-
-#ifdef _MSC_VER
-#include <stdlib.h>
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
-
-#ifndef INT64_MAX
-#define INT64_MAX _I64_MAX
-#endif
-#ifndef INT64_MIN
-#define INT64_MIN _I64_MIN
-#endif
-#ifndef UINT64_MAX
-#define UINT64_MAX _UI64_MAX
-#endif
-#ifndef UINT32_MAX
-#define UINT32_MAX _UI32_MAX
-#endif
 
 #endif
 
