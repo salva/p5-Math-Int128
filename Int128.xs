@@ -6,6 +6,8 @@
 #include "perl.h"
 #include "XSUB.h"
 #include "ppport.h"
+
+#include <stdint.h>
 #include "perl_math_int64.h"
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ >= 4 && __GNUC_MINOR__ < 6
@@ -183,7 +185,7 @@ SvU128OK(pTHX_ SV *sv) {
 }
 
 #define SvI128X(sv) (SvI128Y(SvRV(sv)))
-#define SvU128X(sv) (SvI128Y(SvRV(sv)))
+#define SvU128X(sv) (SvU128Y(SvRV(sv)))
 
 static SV *
 SvSI128(pTHX_ SV *sv) {
@@ -931,8 +933,8 @@ CODE:
         b = SvU128x(self);
     }
     else {
-        b = SvI128(aTHX_ other);
-        a = SvU128x(self);
+        b = SvU128(aTHX_ other);
+        a = SvI128x(self);
     }
     if (may_die_on_overflow && (b > 128)) overflow(aTHX_ left_error);
     if (SvOK(rev))
