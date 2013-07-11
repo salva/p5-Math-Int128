@@ -124,8 +124,8 @@ is ("$l", "1271310319617", "string to/from int128 conversion");
 {
     use integer;
     my $int = int128(255);
-    ok($int == 255);
+    is($int, 255);
     $int <<= 32;
     $int |= 4294967295;
-    ok($int == '1099511627775');
+    is($int, '1099511627775');
 }
