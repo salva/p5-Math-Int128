@@ -176,7 +176,7 @@ be a bottleneck, an alternative set of operations that use their first
 argument as the output (instead of the return value) is also
 provided.
 
-They are...
+They are as follows:
 
   int128_inc int128_dec int128_add int128_sub mul int128_div int128_mod int128_divmod
   int128_and int128_or int128_xor int128_left int128_right int128_not

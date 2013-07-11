@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 47;
+use Test::More tests => 49;
 
 use Math::Int128 qw(uint128 uint128_to_number
                     net_to_uint128 uint128_to_net
@@ -122,3 +122,11 @@ ok (net_to_uint128(uint128_to_net($j)) == $j);
 
 ok (net_to_uint128(uint128_to_net($i)) == $i);
 
+{
+    use integer;
+    my $int = uint128(255);
+    ok($int == 255);
+    $int <<= 32;
+    $int |= 4294967295;
+    ok($int == '1099511627775');
+}
