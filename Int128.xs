@@ -71,8 +71,8 @@ overflow(pTHX_ const char *msg) {
 #endif
 
 #ifdef CACHE_STASHES
-static HV * int128_stash;
-static HV * uint128_stash;
+static HV * volatile int128_stash;
+static HV * volatile uint128_stash;
 
 #  ifdef MULTIPLICITY
 static pthread_mutex_t stash_mutex = PTHREAD_MUTEX_INITIALIZER;
