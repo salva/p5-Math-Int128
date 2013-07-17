@@ -13,6 +13,11 @@ my $mm = WriteMakefile(NAME          => 'Math::Int128',
                        INC           => '-I.',
                        # OPTIMIZE    => '-g -O0',
                        OBJECT        => '$(O_FILES)',
+                       META_MERGE    => {
+                           resources => {
+                               repository  =>  'https://github.com/salva/p5-Math-Int128',
+                           },
+                      },
                       );
 
 my $cc = (grep defined, $mm->{CC}, $Config{cc}, 'cc')[0];
