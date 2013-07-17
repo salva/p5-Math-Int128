@@ -1465,9 +1465,10 @@ CODE:
         RETVAL = newSVu128(aTHX_ (b > 128 ? 0 : a >> b));
     }
     else {
+        uint128_t a = SvU128x(self);
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvU128x(self) >>= (b > 128 ? 128 : b);
+        SvU128x(self) = a >> (b > 128 ? 128 : b);
     }
 OUTPUT:
     RETVAL
