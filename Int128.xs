@@ -1013,7 +1013,6 @@ CODE:
         RETVAL = newSVi128(aTHX_ a >> (b > 127 ? 127 : b));
     }
     else {
-        a = SvI128x(self);
         b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
         SvI128x(self) >>= (b > 127 ? 127 : b);
