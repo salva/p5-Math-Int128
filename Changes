@@ -1,8 +1,7 @@
 Revision history for Perl extension Math::Int128.
 
-0.10  
-      - add support for exponentiation operators (bug report by Dave
-        Rolsky)
+0.10  Jul 17, 2013
+      - add support for exponentiation (bug report by Dave Rolsky)
 
 0.09  Jul 11, 2013
       - operator <<= was broken for unsigned 128bit numbers (bug
