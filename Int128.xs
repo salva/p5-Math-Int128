@@ -54,7 +54,7 @@ check_die_on_overflow_hint(pTHX) {
 #endif
 
 static void
-overflow(pTHX_ char *msg) {
+overflow(pTHX_ const char *msg) {
     if (check_die_on_overflow_hint(aTHX))
         Perl_croak(aTHX_ "Math::Int128 overflow: %s", msg);
 }
@@ -71,8 +71,8 @@ overflow(pTHX_ char *msg) {
 #endif
 
 #ifdef CACHE_STASHES
-static HV *int128_stash;
-static HV *uint128_stash;
+static HV * int128_stash;
+static HV * uint128_stash;
 
 #  ifdef MULTIPLICITY
 static pthread_mutex_t stash_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -116,6 +116,7 @@ static void init_stash_cache(pTHX) { }
 static char *out_of_bounds_error_s = "Number is out of bounds for int128_t conversion";
 static char *out_of_bounds_error_u = "Number is out of bounds for uint128_t conversion";
 static char *mul_error             = "Multiplication overflows";
+static char *pow_error             = "Exponentiation overflows";
 static char *add_error             = "Addition overflows";
 static char *sub_error             = "Subtraction overflows";
 static char *inc_error             = "Increment operation wraps";
@@ -124,7 +125,11 @@ static char *left_b_error          = "Left-shift right operand is out of bounds"
 static char *left_error            = "Left shift overflows";
 static char *right_b_error         = "Right-shift right operand is out of bounds";
 static char *right_error           = "Right shift overflows";
-static char *division_by_zero      = "Illegal division by zero";
+static char *div_by_0_error        = "Illegal division by zero";
+
+static void croak_string(pTHX_ const char *str) {
+    Perl_croak(aTHX_ "%s", str);
+}
 
 #include <strtoint128.h>
 
@@ -194,7 +199,7 @@ SvSI128(pTHX_ SV *sv) {
         if (SvPOK(si128) && (SvCUR(si128) == I128LEN))
             return si128;
     }
-    Perl_croak(aTHX_ "internal error: reference to int128_t expected");
+    croak_string(aTHX_ "internal error: reference to int128_t expected");
 }
 
 static SV *
@@ -204,7 +209,7 @@ SvSU128(pTHX_ SV *sv) {
         if (SvPOK(su128) && (SvCUR(su128) == I128LEN))
             return su128;
     }
-    Perl_croak(aTHX_ "internal error: reference to uint128_t expected");
+    croak_string(aTHX_ "internal error: reference to uint128_t expected");
 }
 
 #define SvI128x(sv) SvI128Y(SvSI128(aTHX_ sv))
@@ -473,6 +478,62 @@ u128_to_hex(uint128_t i128, char *to) {
     }
 }
 
+static void
+mul_check_overflow(pTHX_ uint128_t a, uint128_t b, const char *error_str) {
+    if (a < b) {
+        uint128_t tmp = a;
+        a = b; b = tmp;
+    }
+    if (b > UINT64_MAX) overflow(aTHX_ error_str);
+    else {
+        uint128_t rl, rh;
+        rl = (a & UINT64_MAX) * b;
+        rh = (a >> 64) * b + (rl >> 64);
+        if (rh > UINT64_MAX) overflow(aTHX_ error_str);
+    }
+}
+
+static uint128_t
+powU128(pTHX_ uint128_t a, uint128_t b) {
+    uint128_t r;
+    int mdoo = may_die_on_overflow;
+    if (b == 0) return 1;
+    if (b == 1) return a;
+    if (b == 2) {
+        if (mdoo && (a > UINT64_MAX)) overflow(aTHX_ pow_error);
+        return a*a;
+    }
+    if (a == 0) return 0;
+    if (a == 1) return 1;
+    if (a == 2) {
+        if (b > 127) {
+            if (mdoo) overflow(aTHX_ pow_error);
+            return 0;
+        }
+        return (((uint128_t)1) << b);
+    }
+    if (mdoo) {
+        r = ((b & 1) ? a : 1);
+        while ((b >>= 1)) {
+            if (a > UINT64_MAX) overflow(aTHX_ pow_error);
+            a *= a;
+            if (b & 1) {
+                mul_check_overflow(aTHX_ r, a, pow_error);
+                r *= a;
+            }
+        }
+    }
+    else {
+        r = 1;
+        while (b) {
+            if (b & 1) r *= a;
+            a *= a;
+            b >>= 1;
+        }
+    }
+    return r;
+}
+
 #include "c_api.h"
 
 MODULE = Math::Int128		PACKAGE = Math::Int128			PREFIX=miu128_	
@@ -533,7 +594,7 @@ PREINIT:
     unsigned char *pv = (unsigned char *)SvPV(net, len);
 CODE:
     if (len != 16)
-        Perl_croak(aTHX_ "Invalid length for int128_t");
+        croak_string(aTHX_ "Invalid length for int128_t");
     RETVAL = newSVi128(aTHX_
                        (((((((((((((((((((((((((((((((int128_t)pv[0]) << 8)
                                                    + (int128_t)pv[1]) << 8)
@@ -562,7 +623,7 @@ PREINIT:
     unsigned char *pv = (unsigned char *)SvPV(net, len);
 CODE:
     if (len != 16)
-        Perl_croak(aTHX_ "Invalid length for uint128_t");
+        croak_string(aTHX_ "Invalid length for uint128_t");
     RETVAL = newSVu128(aTHX_
                        (((((((((((((((((((((((((((((((uint128_t)pv[0]) << 8)
                                                    + (uint128_t)pv[1]) << 8)
@@ -627,7 +688,7 @@ PREINIT:
     char *pv = SvPV(native, len);
 CODE:
     if (len != I128LEN)
-        Perl_croak(aTHX_ "Invalid length for int128_t");
+        croak_string(aTHX_ "Invalid length for int128_t");
     RETVAL = newSVi128(aTHX_ 0);
     Copy(pv, &(SvI128X(RETVAL)), I128LEN, char);
 OUTPUT:
@@ -641,7 +702,7 @@ PREINIT:
     char *pv = SvPV(native, len);
 CODE:
     if (len != I128LEN)
-        Perl_croak(aTHX_ "Invalid length for uint128_t");
+        croak_string(aTHX_ "Invalid length for uint128_t");
     RETVAL = newSVu128(aTHX_ 0);
     Copy(pv, &(SvU128X(RETVAL)), I128LEN, char);
 OUTPUT:
@@ -828,16 +889,7 @@ CODE:
             neg ^= 1;
         }
         else b = b1;
-        if (a < b) {
-            uint128_t tmp = a;
-            a = b; b = tmp;
-        }
-        if (b > UINT64_MAX) overflow(aTHX_ mul_error);
-        else {
-            rl = (a & UINT64_MAX) * b;
-            rh = (a >> 64) * b + (rl >> 64);
-            if (rh > UINT64_MAX) overflow(aTHX_ mul_error);
-        }
+        mul_check_overflow(aTHX_ a, b, mul_error);
         if (a * b > (neg ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX)) overflow(aTHX_ mul_error);
     }
     if (SvOK(rev))
@@ -869,13 +921,13 @@ CODE:
             down = SvI128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = newSVi128(aTHX_ up/down);
     }
     else {
         down = SvI128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvI128x(self) /= down;
@@ -902,13 +954,13 @@ CODE:
             down = SvI128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = newSVi128(aTHX_ up % down);
     }
     else {
         down = SvI128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvI128x(self) %= down;
@@ -965,6 +1017,48 @@ CODE:
         b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
         SvI128x(self) >>= (b > 127 ? 127 : b);
+    }
+OUTPUT:
+    RETVAL
+
+SV *mi128_pow(self, other, rev = &PL_sv_no)
+    SV *self
+    SV *other
+    SV *rev
+PREINIT:
+    int sign;
+    uint128_t r;
+    int128_t a, b;
+CODE:
+    if (SvTRUE(rev)) {
+        a = SvI128(aTHX_ other);
+        b = SvI128x(self);
+    }
+    else {
+        a = SvI128x(self);
+        b = SvI128(aTHX_ other);
+    }
+    if (a < 0) {
+        sign = ((b & 1) ? -1 : 1);
+        a = -a;
+    }
+    else sign = 1;
+    if (b < 0) {
+        if      (a == 0) croak_string(aTHX_ div_by_0_error);
+        else if (a == 1) r = sign;
+        else             r = 0;
+    }
+    else {
+        uint128_t u = powU128(aTHX_ a, b);
+        if (may_die_on_overflow && (u > ((sign < 0) ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX))) overflow(aTHX_ pow_error);
+        r = ((sign > 0) ? u : -u);
+    }
+    if (SvOK(rev))
+        RETVAL = newSVi128(aTHX_ r);
+    else {
+        RETVAL = self;
+        SvREFCNT_inc(RETVAL);
+        SvI128x(self) = r;
     }
 OUTPUT:
     RETVAL
@@ -1251,19 +1345,8 @@ PREINIT:
     uint128_t a = SvU128x(self);
     uint128_t b = SvU128(aTHX_ other);
 CODE:
-    if (may_die_on_overflow) {
-        if (a < b) {
-            uint128_t tmp = a;
-            a = b; b = tmp;
-        }
-        if (b > UINT64_MAX) overflow(aTHX_ mul_error);
-        else {
-            uint128_t rl, rh;
-            rl = (a & UINT64_MAX) * b;
-            rh = (a >> 64) * b + (rl >> 64);
-            if (rh > UINT64_MAX) overflow(aTHX_ mul_error);
-        }
-    }
+    if (may_die_on_overflow)
+        mul_check_overflow(aTHX_ a, b, mul_error);
     if (SvOK(rev))
         RETVAL = newSVu128(aTHX_ a * b);
     else {
@@ -1292,13 +1375,13 @@ CODE:
             down = SvU128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = newSVu128(aTHX_ up/down);
     }
     else {
         down = SvU128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvU128x(self) /= down;
@@ -1325,13 +1408,13 @@ CODE:
             down = SvU128(aTHX_ other);
         }
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = newSVu128(aTHX_ up % down);
     }
     else {
         down = SvU128(aTHX_ other);
         if (!down)
-            Perl_croak(aTHX_ division_by_zero);
+            croak_string(aTHX_ div_by_0_error);
         RETVAL = self;
         SvREFCNT_inc(RETVAL);
         SvU128x(self) %= down;
@@ -1385,6 +1468,34 @@ CODE:
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
         SvU128x(self) >>= (b > 128 ? 128 : b);
+    }
+OUTPUT:
+    RETVAL
+
+SV *mu128_pow(self, other, rev = &PL_sv_no)
+    SV *self
+    SV *other
+    SV *rev
+PREINIT:
+    int sign;
+    uint128_t r;
+    int128_t a, b;
+CODE:
+    if (SvTRUE(rev)) {
+        a = SvU128(aTHX_ other);
+        b = SvU128x(self);
+    }
+    else {
+        a = SvU128x(self);
+        b = SvU128(aTHX_ other);
+    }
+    r = powU128(aTHX_ a, b);
+    if (SvOK(rev))
+        RETVAL = newSVu128(aTHX_ r);
+    else {
+        RETVAL = self;
+        SvREFCNT_inc(RETVAL);
+        SvU128x(self) = r;
     }
 OUTPUT:
     RETVAL
@@ -1666,15 +1777,36 @@ CODE:
             uint128_t tmp = a;
             a = b; b = tmp;
         }
-        if (b > UINT64_MAX) overflow(aTHX_ mul_error);
-        else {
-            rl = (a & UINT64_MAX) * b;
-            rh = (a >> 64) * b + (rl >> 64);
-            if (rh > UINT64_MAX) overflow(aTHX_ mul_error);
-        }
+        mul_check_overflow(aTHX_ a, b, mul_error);
         if (a * b > (neg ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX)) overflow(aTHX_ mul_error);
     }
     SvI128x(self) = a1 * b1;
+
+void
+mi128_int128_pow(self, a, b)
+    SV *self
+    int128_t a
+    int128_t b
+PREINIT:
+    int sign;
+    uint128_t r;
+CODE:
+    if (a < 0) {
+        sign = ((b & 1) ? -1 : 1);
+        a = -a;
+    }
+    else sign = 1;
+    if (b < 0) {
+        if      (a == 0) croak_string(aTHX_ div_by_0_error);
+        else if (a == 1) r = sign;
+        else             r = 0;
+    }
+    else {
+        uint128_t u = powU128(aTHX_ a, b);
+        if (may_die_on_overflow && (u > ((sign < 0) ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX))) overflow(aTHX_ pow_error);
+        r = ((sign > 0) ? u : -u);
+    }
+    SvI128x(self) = r;
 
 void
 mi128_int128_div(self, a, b)
@@ -1682,7 +1814,7 @@ mi128_int128_div(self, a, b)
     int128_t a
     int128_t b
 CODE:
-    if (!b) Perl_croak(aTHX_ division_by_zero);
+    if (!b) croak_string(aTHX_ div_by_0_error);
     SvI128x(self) = a / b;
 
 void
@@ -1691,7 +1823,7 @@ mi128_int128_mod(self, a, b)
     int128_t a
     int128_t b
 CODE:
-    if (!b) Perl_croak(aTHX_ division_by_zero);
+    if (!b) croak_string(aTHX_ div_by_0_error);
     SvI128x(self) = a % b;
 
 void
@@ -1703,7 +1835,7 @@ mi128_int128_divmod(self, rem, a, b)
 PREINIT:
     int128_t d;
 CODE:
-    if (!b) Perl_croak(aTHX_ division_by_zero);
+    if (!b) croak_string(aTHX_ div_by_0_error);
     SvI128x(self) = d = a / b;
     SvI128x(rem) = a - b * d;
 
@@ -1836,20 +1968,17 @@ mu128_uint128_mul(self, a, b)
     uint128_t a
     uint128_t b
 CODE:
-    if (may_die_on_overflow) {
-        if (a < b) {
-            uint128_t tmp = a;
-            a = b; b = tmp;
-        }
-        if (b > UINT64_MAX) overflow(aTHX_ mul_error);
-        else {
-            uint128_t rl, rh;
-            rl = (a & UINT64_MAX) * b;
-            rh = (a >> 64) * b + (rl >> 64);
-            if (rh > UINT64_MAX) overflow(aTHX_ mul_error);
-        }
-    }
+    if (may_die_on_overflow)
+        mul_check_overflow(aTHX_ a, b, mul_error);
     SvU128x(self) = a * b;
+
+void
+mu128_uint128_pow(self, a, b)
+    SV *self
+    uint128_t a
+    uint128_t b
+CODE:
+    SvU128x(self) = powU128(aTHX_ a, b);
 
 void
 mu128_uint128_div(self, a, b)
@@ -1857,7 +1986,7 @@ mu128_uint128_div(self, a, b)
     uint128_t a
     uint128_t b
 CODE:
-    if (!b) Perl_croak(aTHX_ division_by_zero);
+    if (!b) croak_string(aTHX_ div_by_0_error);
     SvU128x(self) = a / b;
 
 void
@@ -1866,7 +1995,7 @@ mu128_uint128_mod(self, a, b)
     uint128_t a
     uint128_t b
 CODE:
-    if (!b) Perl_croak(aTHX_ division_by_zero);
+    if (!b) croak_string(aTHX_ div_by_0_error);
     SvU128x(self) = a % b;
 
 void
@@ -1878,7 +2007,7 @@ mu128_uint128_divmod(self, rem, a, b)
 PREINIT:
     uint128_t d;
 CODE:
-    if (!b) Perl_croak(aTHX_ division_by_zero);
+    if (!b) croak_string(aTHX_ div_by_0_error);
     SvU128x(self) = d = a / b;
     SvU128x(rem) = a - b * d;
 

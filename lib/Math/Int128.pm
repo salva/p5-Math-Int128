@@ -39,6 +39,7 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128
                                    int128_add
                                    int128_sub
                                    int128_mul
+                                   int128_pow
                                    int128_div
                                    int128_mod
                                    int128_divmod
@@ -56,6 +57,7 @@ our %EXPORT_TAGS = ( ctors => [qw( int128 uint128
                                    uint128_add
                                    uint128_sub
                                    uint128_mul
+                                   uint128_pow
                                    uint128_div
                                    uint128_mod
                                    uint128_divmod
@@ -79,6 +81,8 @@ use overload ( '+' => \&_add,
                '-=' => \&_sub,
                '*' => \&_mul,
                '*=' => \&_mul,
+               '**' => \&_pow,
+               '**=' => \&_pow,
                '/' => \&_div,
                '/=' => \&_div,
                '%' => \&_remainder,
@@ -113,6 +117,8 @@ use overload ( '+' => \&_add,
                '-=' => \&_sub,
                '*' => \&_mul,
                '*=' => \&_mul,
+               '**' => \&_pow,
+               '**=' => \&_pow,
                '/' => \&_div,
                '/=' => \&_div,
                '%' => \&_remainder,
@@ -139,7 +145,6 @@ use overload ( '+' => \&_add,
                '""' => \&_string,
                '=' => \&_clone,
                fallback => 1 );
-
 
 1;
 
@@ -177,9 +182,9 @@ provided.
 
 They are as follows:
 
-  int128_inc int128_dec int128_add int128_sub mul int128_div int128_mod int128_divmod
-  int128_and int128_or int128_xor int128_left int128_right int128_not
-  int128_neg
+  int128_inc int128_dec int128_add int128_sub int128_mul int128_pow
+  int128_div int128_mod int128_divmod int128_and int128_or int128_xor
+  int128_left int128_right int128_not int128_neg
 
 and the corresponding C<uint128> versions.
 

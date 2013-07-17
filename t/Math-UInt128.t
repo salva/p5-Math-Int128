@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 49;
+use Test::More tests => 448;
 
 use Math::Int128 qw(uint128 uint128_to_number
                     net_to_uint128 uint128_to_net
@@ -129,4 +129,27 @@ ok (net_to_uint128(uint128_to_net($i)) == $i);
     $int <<= 32;
     $int |= 4294967295;
     ok($int == '1099511627775');
+}
+
+my $two  = uint128(2);
+my $four = uint128(4);
+is ($two  ** -1, 0, "signed pow 2**-1");
+is ($four ** -1, 0, "signed pow 4**-1");
+
+for my $j (0..127) {
+    is($two  ** $j, uint128(1) <<     $j, "signed pow 2**$j");
+    is($four ** $j, uint128(1) << 2 * $j, "signed pow 4**$j") if $j < 64;
+}
+
+sub slow_pow {
+    my ($a, $b) = @_;
+    my $acu = uint128(1);
+    $acu *= $a for 1..$b;
+    $acu;
+}
+
+for my $i (5..9) {
+    for my $j (0..40) { # 9**40 < 2**127
+        is(uint128($i) ** $j, slow_pow($i, $j), "signed pow $i ** $j");
+    }
 }
