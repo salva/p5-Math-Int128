@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-use Test::More tests => 448;
+use strict;
+use warnings;
+
+use Test::More 0.88;
 
 use Math::Int128 qw(uint128 uint128_to_number
                     net_to_uint128 uint128_to_net
@@ -152,4 +155,13 @@ for my $i (5..9) {
     for my $j (0..40) { # 9**40 < 2**127
         is(uint128($i) ** $j, slow_pow($i, $j), "signed pow $i ** $j");
     }
+}
+
+done_testing();
+
+sub slow_pow {
+    my ($a, $b) = @_;
+    my $acu = uint128(1);
+    $acu *= $a for 1..$b;
+    $acu;
 }

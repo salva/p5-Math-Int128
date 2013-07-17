@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-use Test::More tests => 446;
+use strict;
+use warnings;
+
+use Test::More 0.88;
 
 use Math::Int128 qw(int128 int128_to_number
                     net_to_int128 int128_to_net
@@ -140,15 +143,17 @@ for my $j (0..127) {
     is($four ** $j, int128(1) << 2 * $j, "signed pow 4**$j") if $j < 64;
 }
 
+for my $i (5..9) {
+    for my $j (0..40) { # 9**40 < 2**127
+        is(int128($i) ** $j, slow_pow($i, $j), "signed pow $i ** $j");
+    }
+}
+
+done_testing();
+
 sub slow_pow {
     my ($a, $b) = @_;
     my $acu = int128(1);
     $acu *= $a for 1..$b;
     $acu;
-}
-
-for my $i (5..9) {
-    for my $j (0..40) { # 9**40 < 2**127
-        is(int128($i) ** $j, slow_pow($i, $j), "signed pow $i ** $j");
-    }
 }
