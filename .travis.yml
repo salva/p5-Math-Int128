@@ -5,4 +5,4 @@ perl:
   - "5.14"
   - "5.12"
   - "5.10"
-before_script: travis_setup.pl
+before_script: travis/setup.pl
