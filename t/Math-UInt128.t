@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-use Test::More tests => 448;
+use strict;
+use warnings;
+
+use Test::More 0.88;
 
 use Math::Int128 qw(uint128 uint128_to_number
                     net_to_uint128 uint128_to_net
@@ -137,19 +140,37 @@ is ($two  ** -1, 0, "signed pow 2**-1");
 is ($four ** -1, 0, "signed pow 4**-1");
 
 for my $j (0..127) {
-    is($two  ** $j, uint128(1) <<     $j, "signed pow 2**$j");
-    is($four ** $j, uint128(1) << 2 * $j, "signed pow 4**$j") if $j < 64;
-}
+    my $one = uint128(1);
 
-sub slow_pow {
-    my ($a, $b) = @_;
-    my $acu = uint128(1);
-    $acu *= $a for 1..$b;
-    $acu;
+    is($two  ** $j, $one <<     $j, "signed pow 2**$j");
+    is($four ** $j, $one << 2 * $j, "signed pow 4**$j") if $j < 64;
+
+    is($one << $j, $two ** $j, "$one << $j");
+
+    $one <<= $j;
+    is($one, $two ** $j, "$one <<= $j");
+
+    next unless $j;
+
+    my $max = (((uint128(2)**127)-1)*2)+1;
+    is($max >> $j, $max / ( 2**$j ), "max uint128 >> $j");
+
+    my $copy = uint128($max);
+    $copy >>= $j;
+    is($copy, $max / ( 2**$j ), "max uint128 >>= $j");
 }
 
 for my $i (5..9) {
     for my $j (0..40) { # 9**40 < 2**127
         is(uint128($i) ** $j, slow_pow($i, $j), "signed pow $i ** $j");
     }
+}
+
+done_testing();
+
+sub slow_pow {
+    my ($a, $b) = @_;
+    my $acu = uint128(1);
+    $acu *= $a for 1..$b;
+    $acu;
 }

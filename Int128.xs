@@ -213,7 +213,7 @@ SvSU128(pTHX_ SV *sv) {
 }
 
 #define SvI128x(sv) SvI128Y(SvSI128(aTHX_ sv))
-#define SvU128x(sv) SvI128Y(SvSU128(aTHX_ sv))
+#define SvU128x(sv) SvU128Y(SvSU128(aTHX_ sv))
 
 static int128_t
 SvI128(pTHX_ SV *sv) {
@@ -1013,7 +1013,6 @@ CODE:
         RETVAL = newSVi128(aTHX_ a >> (b > 127 ? 127 : b));
     }
     else {
-        a = SvI128x(self);
         b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
         SvI128x(self) >>= (b > 127 ? 127 : b);
