@@ -1,5 +1,10 @@
 Revision history for Perl extension Math::Int128.
 
+0.12  Jul 19, 2013
+      - improve gcc version detection (bug report by
+        d.thomas@its.uq.edu.au)
+      - experimental support for clang compiler added
+
 0.11  Jul 18, 2013
       - fix >>= operator (patch by Dave Rolsky)
       - more and better tests (patch by Dave Rolsky)
