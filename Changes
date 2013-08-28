@@ -1,5 +1,9 @@
 Revision history for Perl extension Math::Int128.
 
+0.13
+      - silent several compiler warnings (bug report and patch by
+        d.thomas@its.uq.edu.au)
+
 0.12  Jul 19, 2013
       - improve gcc version detection (bug report by
         d.thomas@its.uq.edu.au)
