@@ -121,10 +121,6 @@ static char *add_error             = "Addition overflows";
 static char *sub_error             = "Subtraction overflows";
 static char *inc_error             = "Increment operation wraps";
 static char *dec_error             = "Decrement operation wraps";
-static char *left_b_error          = "Left-shift right operand is out of bounds";
-static char *left_error            = "Left shift overflows";
-static char *right_b_error         = "Right-shift right operand is out of bounds";
-static char *right_error           = "Right shift overflows";
 static char *div_by_0_error        = "Illegal division by zero";
 
 static void croak_string(pTHX_ const char *str) {
@@ -200,6 +196,7 @@ SvSI128(pTHX_ SV *sv) {
             return si128;
     }
     croak_string(aTHX_ "internal error: reference to int128_t expected");
+    return NULL; /* never happens */
 }
 
 static SV *
@@ -210,6 +207,7 @@ SvSU128(pTHX_ SV *sv) {
             return su128;
     }
     croak_string(aTHX_ "internal error: reference to uint128_t expected");
+    return NULL; /* never happens */
 }
 
 #define SvI128x(sv) SvI128Y(SvSI128(aTHX_ sv))
@@ -878,7 +876,7 @@ PREINIT:
 CODE:
     if (may_die_on_overflow) {
         int neg = 0;
-        uint128_t a, b, rl, rh;
+        uint128_t a, b;
         if (a1 < 0) {
             a = -a1;
             neg ^= 1;
@@ -1256,8 +1254,6 @@ OUTPUT:
 SV *
 mi128_string(self, ...)
     SV *self
-PREINIT:
-    STRLEN len;
 CODE:
     RETVAL = newSV(I128STRLEN);
     SvPOK_on(RETVAL);
@@ -1476,7 +1472,6 @@ SV *mu128_pow(self, other, rev = &PL_sv_no)
     SV *other
     SV *rev
 PREINIT:
-    int sign;
     uint128_t r;
     int128_t a, b;
 CODE:
@@ -1693,8 +1688,6 @@ OUTPUT:
 SV *
 mu128_string(self, ...)
     SV *self
-PREINIT:
-    STRLEN len;
 CODE:
     RETVAL = newSV(I128STRLEN);
     SvPOK_on(RETVAL);
@@ -1761,7 +1754,7 @@ mi128_int128_mul(self, a1, b1)
 CODE:
     if (may_die_on_overflow) {
         int neg = 0;
-        uint128_t a, b, rl, rh;
+        uint128_t a, b;
         if (a1 < 0) {
             a = -a1;
             neg ^= 1;

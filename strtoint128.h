@@ -44,7 +44,7 @@ strtoint128(pTHX_ const char *s, int base, int sign) {
     uint128_t acc = 0;
     int c, neg, between = 0;
     
-    uint128_t upper_mul_limit;
+    uint128_t upper_mul_limit = 0;
 
     /*
      * Skip white space and pick up leading +/- sign if any.
@@ -72,8 +72,6 @@ strtoint128(pTHX_ const char *s, int base, int sign) {
     if (base == 0)
         base = c == '0' ? 8 : 10;
     
-    // if (may_die_on_overflow) upper_mul_limit = UINT128_MAX / base;
-
     for (;; c = (unsigned char) *s++) {
         if (isdigit(c))
             c -= '0';
@@ -86,7 +84,14 @@ strtoint128(pTHX_ const char *s, int base, int sign) {
         if (c >= base)
             break;
         if (may_die_on_overflow) {
-            if (acc > upper_mul_limit) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u));
+        redo:
+            if (acc > upper_mul_limit) {
+                if (!upper_mul_limit) {
+                    upper_mul_limit = UINT128_MAX / base;
+                    goto redo;
+                }
+                overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u));
+            }
             acc *= base;
             if (UINT128_MAX - acc < c) overflow(aTHX_ (sign ? out_of_bounds_error_s : out_of_bounds_error_u));
             acc += c;
