@@ -23,6 +23,10 @@ typedef unsigned __int128 uint128_t;
 
 #endif
 
+/* perl memory allocator does not guarantee 16-byte alignment */
+typedef int128_t int128_t_a8 __attribute__ ((aligned(8)));
+typedef uint128_t uint128_t_a8 __attribute__ ((aligned(8)));
+
 #define I128LEN sizeof(int128_t)
 
 #define INT128_MAX ((int128_t)((~(uint128_t)0)>>1))
@@ -129,8 +133,8 @@ static void croak_string(pTHX_ const char *str) {
 
 #include <strtoint128.h>
 
-#define SvI128Y(sv) (*((int128_t*)SvPVX(sv)))
-#define SvU128Y(sv) (*((uint128_t*)SvPVX(sv)))
+#define SvI128Y(sv) (*((int128_t_a8*)SvPVX(sv)))
+#define SvU128Y(sv) (*((uint128_t_a8*)SvPVX(sv)))
 #define SVt_I128 SVt_PV
 
 static SV *

@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 0.13
+      - fix unaligned memory access problems happening on
+        Windows+Strawerry Perl (bug report by Sisyphus)
       - silent several compiler warnings (bug report and patch by
         d.thomas@its.uq.edu.au)
 
