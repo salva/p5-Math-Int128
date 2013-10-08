@@ -1,6 +1,11 @@
-use ExtUtils::MakeMaker;
+use strict;
+use warnings;
+
+use lib 'inc';
 
 use Config;
+use Config::AutoConf;
+use ExtUtils::MakeMaker;
 
 my %deps = ('Math::Int64' => '0.27_04');
 
@@ -10,6 +15,19 @@ unless (-f "c_api.h") {
 
 unless (-f "perl_math_int64.c" and -f "perl_math_int64.h") {
     warn "perl_math_int64.c or perl_math_int64.h files are not found, Math::Int64 has to be cloned under the same root directory as Math::Int128\n";
+}
+
+unless ( Config::AutoConf->check_type('unsigned __int128') ) {
+    warn <<'EOF';
+
+  It looks like your compiler doesn't support the "unsigned __int128"
+  type. This type is necessary to compile the Math::Int128 module.
+
+  This type is supported by GCC 4.4+ and clang 3.2+.
+
+EOF
+
+    exit 1;
 }
 
 my $mm = WriteMakefile(NAME          => 'Math::Int128',
@@ -29,22 +47,6 @@ my $mm = WriteMakefile(NAME          => 'Math::Int128',
                            },
                       },
                       );
-
-my $cc = (grep defined, $mm->{CC}, $Config{cc}, 'cc')[0];
-my $cc_version = `$cc --version --verbose 2>&1`;
-if (($cc_version =~ /^GNU\s+C\s+\([^)]*\)\s+version\s+(4\.(\d+)\S*)/im or
-         $cc_version =~ /^g?cc\s+\(GCC\)\s+(4\.(\d+)\S*)/im ) and
-        $2 >= 4) {
-    print "GNU C compiler version $1 found, good!\n";
-}
-elsif ($cc_version =~ /\bclang\s+version\s+(3.(\d+)\S*)/im and
-       $2 >= 2) {
-    print "Clang compiler version $1 found, good!\n";
-}
-else {
-    unlink $mm->{MAKEFILE};
-    die "This module requires version 4.4 or above of the GCC compiler.\nAborting!\n\n"
-}
 
 
 package MY;
