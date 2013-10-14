@@ -17,13 +17,19 @@ unless (-f "perl_math_int64.c" and -f "perl_math_int64.h") {
     warn "perl_math_int64.c or perl_math_int64.h files are not found, Math::Int64 has to be cloned under the same root directory as Math::Int128\n";
 }
 
-unless ( Config::AutoConf->check_type('unsigned __int128') ) {
+unless (
+    Config::AutoConf->check_type('unsigned __int128')
+    || Config::AutoConf->check_type(
+        'unsigned int __attribute__ ((__mode__ (TI)))')
+    ) {
+
     warn <<'EOF';
 
-  It looks like your compiler doesn't support the "unsigned __int128"
-  type. This type is necessary to compile the Math::Int128 module.
+  It looks like your compiler doesn't support the "unsigned __int128" or
+  "unsigned int __attribute__ ((__mode__ (TI)))" types. One of these types is
+  necessary to compile the MaxMind::DB::Reader::XS module.
 
-  This type is supported by GCC 4.4+ and clang 3.2+.
+  One or the other of these types is supported by GCC 4.4+ and clang 3.2+.
 
 EOF
 
