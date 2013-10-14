@@ -4,6 +4,7 @@
 /MYMETA.json
 /MYMETA.yml
 /Makefile
+/Makefile.old
 /blib/
 /c_api.h
 /c_api_client/perl_math_int128.c
