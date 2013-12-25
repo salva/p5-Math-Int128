@@ -993,7 +993,7 @@ CODE:
     else {
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvI128x(self) <<= (b > 128 ? 128 : b);
+        SvI128x(self) = (b > 127 ? 0 : SvI128x(self) << b);
     }
 OUTPUT:
     RETVAL
@@ -1015,12 +1015,12 @@ CODE:
             b = SvU128(aTHX_ other);
             a = SvI128x(self);
         }
-        RETVAL = newSVi128(aTHX_ a >> (b > 127 ? 127 : b));
+        RETVAL = newSVi128(aTHX_ (b > 127 ? 0 : a >> b));
     }
     else {
         b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvI128x(self) >>= (b > 127 ? 127 : b);
+        SvI128x(self) = (b > 127 ? 0 : SvI128x(self) >> b);
     }
 OUTPUT:
     RETVAL
@@ -1444,7 +1444,7 @@ CODE:
     else {
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvU128x(self) <<= (b > 128 ? 128 : b);
+        SvU128x(self) = (b > 127 ? 0 : SvU128x(self) << b);
     }
 OUTPUT:
     RETVAL
@@ -1469,7 +1469,7 @@ CODE:
     else {
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvU128x(self) >>= (b > 128 ? 128 : b);
+        SvU128x(self) = (b > 127 ? 0 : SvU128x(self) >> b);
     }
 OUTPUT:
     RETVAL
