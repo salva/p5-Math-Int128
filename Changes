@@ -1,5 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
+      - More left and right shift fixes. When shifting left or right by more
+        than 127 bits, the return value is now always zero. (Dave Rolsky)
+
 0.13  Sep 7, 2013
       - fix unaligned memory access problems happening on
         Windows+Strawerry Perl (bug report by Sisyphus)
