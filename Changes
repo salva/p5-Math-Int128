@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - More left and right shift fixes. When shifting left or right by more
+        than 127 bits, the return value is now always zero. (Dave Rolsky)
 
 0.16_04  2014-12-15
       - clang on FreeBSD i386 will claim to support 128-bit integers but then
