@@ -12,7 +12,7 @@
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ >= 4 && __GNUC_MINOR__ < 6
 
-/* workaroung for gcc 4.4/4.5 - see http://gcc.gnu.org/gcc-4.4/changes.html */
+/* workaround for gcc 4.4/4.5 - see http://gcc.gnu.org/gcc-4.4/changes.html */
 typedef int int128_t __attribute__ ((__mode__ (TI)));
 typedef unsigned int uint128_t __attribute__ ((__mode__ (TI)));
 
@@ -990,7 +990,7 @@ CODE:
     else {
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvI128x(self) <<= (b > 128 ? 128 : b);
+        SvI128x(self) = (b > 127 ? 0 : SvI128x(self) << b);
     }
 OUTPUT:
     RETVAL
@@ -1012,12 +1012,12 @@ CODE:
             b = SvU128(aTHX_ other);
             a = SvI128x(self);
         }
-        RETVAL = newSVi128(aTHX_ a >> (b > 127 ? 127 : b));
+        RETVAL = newSVi128(aTHX_ (b > 127 ? 0 : a >> b));
     }
     else {
         b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvI128x(self) >>= (b > 127 ? 127 : b);
+        SvI128x(self) = (b > 127 ? 0 : SvI128x(self) >> b);
     }
 OUTPUT:
     RETVAL
@@ -1436,12 +1436,12 @@ CODE:
             b = SvU128(aTHX_ other);
             a = SvU128x(self);
         }
-        RETVAL = newSVu128(aTHX_ (b > 128 ? 0 : a << b));
+        RETVAL = newSVu128(aTHX_ (b > 127 ? 0 : a << b));
     }
     else {
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvU128x(self) <<= (b > 128 ? 128 : b);
+        SvU128x(self) = (b > 127 ? 0 : SvU128x(self) << b);
     }
 OUTPUT:
     RETVAL
@@ -1461,12 +1461,12 @@ CODE:
             b = SvU128(aTHX_ other);
             a = SvU128x(self);
         }
-        RETVAL = newSVu128(aTHX_ (b > 128 ? 0 : a >> b));
+        RETVAL = newSVu128(aTHX_ (b > 127 ? 0 : a >> b));
     }
     else {
         uint128_t b = SvU128(aTHX_ other);
         RETVAL = SvREFCNT_inc(self);
-        SvU128x(self) >>= (b > 128 ? 128 : b);
+        SvU128x(self) = (b > 127 ? 0 : SvU128x(self) >> b);
     }
 OUTPUT:
     RETVAL
