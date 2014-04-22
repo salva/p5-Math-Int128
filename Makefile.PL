@@ -41,6 +41,9 @@ elsif ($cc_version =~ /\bclang\s+version\s+(3.(\d+)\S*)/im and
        $2 >= 2) {
     print "Clang compiler version $1 found, good!\n";
 }
+elsif ($cc_version =~ /\(clang-([\.\d]+)\)/im and $1 >= 500){
+    print "Clang compiler version $1 found, good!\n";
+}
 else {
     unlink $mm->{MAKEFILE};
     die "This module requires version 4.4 or above of the GCC compiler.\nAborting!\n\n"
