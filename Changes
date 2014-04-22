@@ -1,5 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
+0.14  April 22, 2014
+      - [wesyoung] update Makefile.PL to work with Clang >= 500 (OSX 10.9)
+
 0.13  Sep 7, 2013
       - fix unaligned memory access problems happening on
         Windows+Strawerry Perl (bug report by Sisyphus)
