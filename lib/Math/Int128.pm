@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    our $VERSION = '0.13';
+    our $VERSION = '0.14';
 
     require XSLoader;
     XSLoader::load('Math::Int128', $VERSION);
@@ -245,7 +245,7 @@ L<http://perlmonks.org/?node_id=886488>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007, 2009, 2011-2013 by Salvador FandiE<ntilde>o
+Copyright (C) 2007, 2009, 2011-2014 by Salvador FandiE<ntilde>o
 (sfandino@yahoo.com)
 
 This library is free software; you can redistribute it and/or modify

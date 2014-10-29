@@ -139,6 +139,21 @@ my $four = uint128(4);
 is ($two  ** -1, 0, "signed pow 2**-1");
 is ($four ** -1, 0, "signed pow 4**-1");
 
+sub slow_pow_uint128 {
+    my ($a, $b) = @_;
+    my $acu = uint128(1);
+    $acu *= $a for 1..$b;
+    $acu;
+}
+
+sub slow_pow_nv {
+    my ($base, $exp) = @_;
+    my $r = 1;
+    $r *= $base for 1..$exp;
+    $r
+}
+
+my $max = (((uint128(2) ** 127) - 1) * 2) + 1;
 for my $j (0..127) {
     my $one = uint128(1);
 
@@ -152,25 +167,19 @@ for my $j (0..127) {
 
     next unless $j;
 
-    my $max = (((uint128(2)**127)-1)*2)+1;
-    is($max >> $j, $max / ( 2**$j ), "max uint128 >> $j");
+    my $pow2j = slow_pow_nv(2, $j);
+
+    is($max >> $j, $max / $pow2j, "max uint128 >> $j");
 
     my $copy = uint128($max);
     $copy >>= $j;
-    is($copy, $max / ( 2**$j ), "max uint128 >>= $j");
+    is($copy, $max / $pow2j, "max uint128 >>= $j");
 }
 
 for my $i (5..9) {
     for my $j (0..40) { # 9**40 < 2**127
-        is(uint128($i) ** $j, slow_pow($i, $j), "signed pow $i ** $j");
+        is(uint128($i) ** $j, slow_pow_uint128($i, $j), "signed pow $i ** $j");
     }
 }
 
 done_testing();
-
-sub slow_pow {
-    my ($a, $b) = @_;
-    my $acu = uint128(1);
-    $acu *= $a for 1..$b;
-    $acu;
-}

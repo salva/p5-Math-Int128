@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More 0.88;
 
-use Math::Int128 qw(int128 int128_to_number
+use Math::Int128 qw(int128 int128_to_number uint128
                     net_to_int128 int128_to_net
                     native_to_int128 int128_to_native);
 
@@ -138,7 +138,24 @@ my $four = int128(4);
 is ($two  ** -1, 0, "signed pow 2**-1");
 is ($four ** -1, 0, "signed pow 4**-1");
 
-for my $j (0..127) {
+sub slow_pow_int128 {
+    my ($a, $b) = @_;
+    my $acu = int128(1);
+    $acu *= $a for 1..$b;
+    $acu;
+}
+
+sub slow_pow_nv {
+    my ($base, $exp) = @_;
+    my $r = 1;
+    $r *= $base for 1..$exp;
+    $r
+}
+
+use Math::BigInt;
+
+my $max = (((int128(2) ** 126) - 1) * 2) + 1; # 2 ** 127 - 1
+for my $j (0..126) {
     my $one = int128(1);
 
     is($two  ** $j, $one <<     $j, "signed pow 2**$j");
@@ -151,26 +168,25 @@ for my $j (0..127) {
 
     next unless $j;
 
-    my $max = (((int128(2)**126)-1)*2)+1;
-    is($max >> $j, $max / ( 2**$j ), "max int128 >> $j");
+    my $pow2j = slow_pow_nv(2, $j);
+
+    is(uint128($pow2j), uint128(2)**$j, "int128 pow and NV to int128 conversion");
+    is($max >> $j, $max / $pow2j, "max int128 >> $j")
+        or diag '$max >> $j = ' . ($max >> $j) . ', $max / 2 ** $j = ' . ($max / $pow2j) .
+            ", \$max = $max, \$j = $j, 2 ** \$j = " . sprintf("%f", $pow2j) .
+                ", int128(2 ** \$j) = " . int128($pow2j);
 
     my $copy = int128($max);
     $copy >>= $j;
-    is($copy, $max / ( 2**$j ), "max int128 >>= $j");
+    is($copy, $max / $pow2j, "max int128 >>= $j");
 
 }
 
 for my $i (5..9) {
     for my $j (0..40) { # 9**40 < 2**127
-        is(int128($i) ** $j, slow_pow($i, $j), "signed pow $i ** $j");
+        is(int128($i) ** $j, slow_pow_int128($i, $j), "signed pow $i ** $j");
     }
 }
 
 done_testing();
 
-sub slow_pow {
-    my ($a, $b) = @_;
-    my $acu = int128(1);
-    $acu *= $a for 1..$b;
-    $acu;
-}
