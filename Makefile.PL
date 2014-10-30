@@ -59,7 +59,7 @@ sub postamble {
     return <<MAKE_FRAG
 
 c_api.h: c_api.decl
-	make_perl_module_c_api module_name=\$(NAME) module_version=\$(VERSION) author='$author'
+	perl -MModule::CAPIMaker -emake_c_api module_name=\$(NAME) module_version=\$(VERSION) author='$author'
 MAKE_FRAG
 }
 
