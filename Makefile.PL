@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 
 use Config;
 
-my %deps = ('Math::Int64' => '0.27_04');
+my %deps = ('Math::Int64' => '0.34');
 
 unless (-f "c_api.h") {
     $deps{'Module::CAPIMaker'} = '0.01';
@@ -30,20 +30,21 @@ my $mm = WriteMakefile(NAME          => 'Math::Int128',
                       },
                       );
 
-my $cc = (grep defined, $mm->{CC}, $Config{cc}, 'cc')[0];
+my $cc = 'cc';#(grep defined, $mm->{CC}, $Config{cc}, 'cc')[0];
 my $cc_version = `$cc --version --verbose 2>&1`;
-if (($cc_version =~ /^GNU\s+C\s+\([^)]*\)\s+version\s+(4\.(\d+)\S*)/im or
-         $cc_version =~ /^g?cc\s+\(GCC\)\s+(4\.(\d+)\S*)/im ) and
-        $2 >= 4) {
+if ( ($cc_version =~ /^GNU\s+C\s+\([^)]*\)\s+version\s+((\d+\.\d+)\S*)/im or
+      $cc_version =~ /^g?cc\s+\(GCC\)\s+((\d+.\d+)\S*)/im or
+      $cc_version =~ /^gcc\s+version\s+((\d+\.\d+)\S*)/im) and
+     $2 >= 4.4) {
     print "GNU C compiler version $1 found, good!\n";
 }
-elsif ($cc_version =~ /\bclang\s+version\s+(3.(\d+)\S*)/im and
-       $2 >= 2) {
+elsif ($cc_version =~ /\bclang\s+version\s+((\d+\.\d+)\S*)/im and
+       $2 >= 3.2) {
     print "Clang compiler version $1 found, good!\n";
 }
 else {
     unlink $mm->{MAKEFILE};
-    die "This module requires version 4.4 or above of the GCC compiler.\nAborting!\n\n"
+    die "This module requires gcc 4.4 or clang 3.2 or above.\nAborting!\n\n"
 }
 
 
