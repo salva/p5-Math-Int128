@@ -1,11 +1,15 @@
 Revision history for Perl extension Math::Int128.
 
-0.15  Nov 30, 2014
+0.16_01  Nov 2, 2014
+      - Dump output from compiler version command when running on a
+        CPAN tester
+
+0.15  Oct 30, 2014
       - improve clang version detection code (bug report by Olaf
         Alders)
       - relax gcc version detection
 
-0.14  Nov 29, 2014
+0.14  Oct 29, 2014
       - tests were broken on perls compiled with -Dusequadmath (bug
         report by Sisyphus)
 

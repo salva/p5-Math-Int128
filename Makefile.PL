@@ -44,7 +44,13 @@ elsif ($cc_version =~ /\bclang\s+version\s+((\d+\.\d+)\S*)/im and
 }
 else {
     unlink $mm->{MAKEFILE};
-    die "This module requires gcc 4.4 or clang 3.2 or above.\nAborting!\n\n"
+
+    if ($ENV{AUTOMATED_TESTING}) {
+        $cc_version =~ s/^/# /gm;
+        print "Output from compiler version command follows:\n$cc_version\n";
+    }
+
+    die "This module requires gcc 4.4 or clang 3.2 or above.\nAborting!\n";
 }
 
 
