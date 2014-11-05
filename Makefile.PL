@@ -38,8 +38,9 @@ if ( ($cc_version =~ /^GNU\s+C\s+\([^)]*\)\s+version\s+((\d+\.\d+)\S*)/im or
      $2 >= 4.4) {
     print "GNU C compiler version $1 found, good!\n";
 }
-elsif ($cc_version =~ /\bclang\s+version\s+((\d+\.\d+)\S*)/im and
-       $2 >= 3.2) {
+elsif ( ($cc_version =~ /\bclang\s+version\s+((\d+\.\d+)\S*)/im or
+         $cc_version =~ /based\s+on\s+LLVM\s+((\d+\.\d+)\S*)\)/im ) and
+        $2 >= 3.2) {
     print "Clang compiler version $1 found, good!\n";
 }
 else {

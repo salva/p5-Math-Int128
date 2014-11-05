@@ -1,7 +1,10 @@
 Revision history for Perl extension Math::Int128.
 
+0.16_02  Nov 5, 2014
+      - add logic for detecting Apple variant of clang compiler
+
 0.16_01  Nov 2, 2014
-      - Dump output from compiler version command when running on a
+      - dump output from compiler version command when running on a
         CPAN tester
 
 0.15  Oct 30, 2014
