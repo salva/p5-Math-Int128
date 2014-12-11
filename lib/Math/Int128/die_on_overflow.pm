@@ -1,5 +1,10 @@
 package Math::Int128::die_on_overflow;
 
+use strict;
+use warnings;
+
+our $VERSION = '0.16_02';
+
 sub import {
     require Math::Int128;
     Math::Int128::_set_may_die_on_overflow(1);

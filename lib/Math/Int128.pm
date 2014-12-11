@@ -4,10 +4,9 @@ use strict;
 use warnings;
 
 BEGIN {
-    our $VERSION = '0.16_02';
-
-    require XSLoader;
-    XSLoader::load('Math::Int128', $VERSION);
+our $VERSION = '0.16_02';
+require XSLoader;
+XSLoader::load('Math::Int128', $VERSION);
 }
 
 use constant MAX_INT128  => string_to_int128 ( '0x7fff_ffff_ffff_ffff_ffff_ffff_ffff_ffff');
