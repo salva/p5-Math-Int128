@@ -1,5 +1,9 @@
 Revision history for Perl extension Math::Int128.
 
+{{$NEXT}}
+      - Removed compiler detection in favor of compiler feature checking with
+        Config::AutoConf. (Dave Rolsky)
+
 0.16_02  Nov 5, 2014
       - add logic for detecting Apple variant of clang compiler
 
