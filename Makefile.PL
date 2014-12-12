@@ -42,7 +42,7 @@ my %WriteMakefileArgs = (
     "TESTS" => "t/*.t"
   }
 );
-$WriteMakefileArgs{DEFINE} = _backend_define();
+$WriteMakefileArgs{DEFINE} = _int128_define();
 
 my %FallbackPrereqs = (
   "Exporter" => 0,
@@ -69,20 +69,35 @@ unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
 
-_check_int128_support();
+_check_for_capi_maker();
 
 WriteMakefile(%WriteMakefileArgs);
 
 use lib 'inc';
 use Config::AutoConf;
 
-sub _check_int128_support {
+sub _check_for_capi_maker {
+    return unless -d '.git';
+
+    unless ( eval { require Module::CAPIMaker; 1; } ) {
+        warn <<'EOF';
+
+  It looks like you're trying to build Math::Int64 from the git repo. You'll
+  need to install Module::CAPIMaker from CPAN in order to do this.
+
+EOF
+
+        exit 1;
+    }
+}
+
+sub _int128_define {
     my $autoconf = Config::AutoConf->new;
 
-    return
-        if $autoconf->check_default_headers()
-        && ( $autoconf->check_type('int __attribute__ ((__mode__ (TI)))')
-        || $autoconf->check_type('__int128') );
+    return unless $autoconf->check_default_headers();
+    return '-D__INT128' if $autoconf->check_type('__int128');
+    return '-DINT128_TI'
+        if $autoconf->check_type('int __attribute__ ((__mode__ (TI)))');
 
     warn <<'EOF';
 
@@ -93,21 +108,6 @@ sub _check_int128_support {
 EOF
 
     exit 1;
-}
-
-sub _backend_define {
-    my $backend
-        = defined $ENV{MATH_INT64_BACKEND} ? $ENV{MATH_INT64_BACKEND}
-        : $Config::Config{ivsize} >= 8     ? 'IV'
-        : $Config::Config{doublesize} >= 8 ? 'NV'
-        :                                    die <<'EOF';
-Unable to find a suitable representation for int64 on your system.
-Your Perl must have ivsize >= 8 or doublesize >= 8.
-EOF
-
-    print "Using $backend backend\n";
-
-    return '-DINT64_BACKEND_' . $backend;
 }
 
 package MY;
