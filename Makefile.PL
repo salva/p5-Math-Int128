@@ -112,6 +112,19 @@ EOF
 
 package MY;
 
+sub postamble {
+    my $self = shift;
+
+    my $author = $self->{AUTHOR};
+    $author = join( ', ', @$author ) if ref $author;
+    $author =~ s/'/'\''/g;
+
+    return <<"MAKE_FRAG";
+c_api.h: c_api.decl
+	perl -MModule::CAPIMaker -emake_c_api module_name=\$(NAME) module_version=\$(VERSION) author='$author'
+MAKE_FRAG
+}
+
 sub init_dirscan {
     my $self = shift;
     $self->SUPER::init_dirscan(@_);
