@@ -43,7 +43,7 @@ Revision history for Perl extension Math::Int128.
       - operator <<= was broken for unsigned 128bit numbers (bug
         report by Dave Rolsky)
 
-0.08_01
+0.08_01  Not Released
       - include stdint.h for 64bit integer definitions (bug report and
         solution by Sisyphus)
 
