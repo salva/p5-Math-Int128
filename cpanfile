@@ -1,4 +1,5 @@
 requires "Exporter" => "0";
+requires "Math::Int64" => "0.34";
 requires "XSLoader" => "0";
 requires "constant" => "0";
 requires "overload" => "0";

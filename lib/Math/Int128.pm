@@ -11,6 +11,8 @@ require XSLoader;
 XSLoader::load('Math::Int128', $VERSION);
 }
 
+use Math::Int64 0.34;
+
 use constant MAX_INT128  => string_to_int128 ( '0x7fff_ffff_ffff_ffff_ffff_ffff_ffff_ffff');
 use constant MIN_INT128  => string_to_int128 ('-0x8000_0000_0000_0000_0000_0000_0000_0000');
 use constant MAX_UINT128 => string_to_uint128( '0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff');
