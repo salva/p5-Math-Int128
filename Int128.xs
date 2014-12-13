@@ -134,7 +134,7 @@ static void croak_string(pTHX_ const char *str) {
     Perl_croak(aTHX_ "%s", str);
 }
 
-#include <strtoint128.h>
+#include "strtoint128.h"
 
 #define SvI128Y(sv) (*((int128_t_a8*)SvPVX(sv)))
 #define SvU128Y(sv) (*((uint128_t_a8*)SvPVX(sv)))
