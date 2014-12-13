@@ -7,6 +7,17 @@ use Moose;
 
 extends 'Dist::Zilla::Plugin::MakeMaker::Awesome';
 
+override _build_WriteMakefile_args => sub {
+    my $self = shift;
+
+    my $args = super();
+    # This makes it build the perl_math_int64.c file into a .o and then link
+    # it with Int128.o
+    $args->{OBJECT} = '$(O_FILES)';
+
+    return $args;
+};
+
 override _build_WriteMakefile_dump => sub {
     my $self = shift;
 
