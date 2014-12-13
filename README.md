@@ -93,7 +93,9 @@ Amazon Wish List: [http://amzn.com/w/1WU1P6IR5QZ42](http://amzn.com/w/1WU1P6IR5Q
 
 # COPYRIGHT AND LICENSE
 
-Copyright (C) 2007, 2009, 2011-2014 by Salvador Fandiño (sfandino@yahoo.com)
+Copyright © 2007, 2009, 2011-2014 by Salvador Fandiño (sfandino@yahoo.com)
+
+Copyright © 2014 by Dave Rolsky
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
