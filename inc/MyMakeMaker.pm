@@ -15,6 +15,9 @@ override _build_WriteMakefile_args => sub {
     # it with Int128.o
     $args->{OBJECT} = '$(O_FILES)';
 
+    delete $args->{VERSION};
+    $args->{VERSION_FROM} = 'lib/Math/Int128.pm';
+
     return $args;
 };
 

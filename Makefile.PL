@@ -39,7 +39,7 @@ my %WriteMakefileArgs = (
     "Test::More" => "0.88",
     "integer" => 0
   },
-  "VERSION" => "0.16_03",
+  "VERSION_FROM" => "lib/Math/Int128.pm",
   "test" => {
     "TESTS" => "t/*.t"
   }
