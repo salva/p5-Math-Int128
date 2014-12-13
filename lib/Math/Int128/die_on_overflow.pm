@@ -1,5 +1,10 @@
 package Math::Int128::die_on_overflow;
 
+use strict;
+use warnings;
+
+our $VERSION = '0.16_03';
+
 sub import {
     require Math::Int128;
     Math::Int128::_set_may_die_on_overflow(1);
@@ -14,6 +19,8 @@ sub unimport {
 1;
 
 __END__
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -34,8 +41,7 @@ L<Math::Int128>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright E<copy> 2011, 2013 by Salvador FandiE<ntilde>o
-(sfandino@yahoo.com)
+Copyright E<copy> 2011, 2013 by Salvador Fandiño (sfandino@yahoo.com)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

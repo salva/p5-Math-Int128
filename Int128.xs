@@ -10,17 +10,20 @@
 #include <stdint.h>
 #include "perl_math_int64.h"
 
-#if __GNUC__ == 4 && __GNUC_MINOR__ >= 4 && __GNUC_MINOR__ < 6
-
-/* workaroung for gcc 4.4/4.5 - see http://gcc.gnu.org/gcc-4.4/changes.html */
+#ifdef INT128_TI
 typedef int int128_t __attribute__ ((__mode__ (TI)));
 typedef unsigned int uint128_t __attribute__ ((__mode__ (TI)));
+#define HAVE_INT128
+#endif
 
-#else
-
+#ifdef __INT128
 typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
+#define HAVE_INT128
+#endif
 
+#ifndef HAVE_INT128
+#error "No int128 type define was passed to the compiler!"
 #endif
 
 /* perl memory allocator does not guarantee 16-byte alignment */
@@ -131,7 +134,7 @@ static void croak_string(pTHX_ const char *str) {
     Perl_croak(aTHX_ "%s", str);
 }
 
-#include <strtoint128.h>
+#include "strtoint128.h"
 
 #define SvI128Y(sv) (*((int128_t_a8*)SvPVX(sv)))
 #define SvU128Y(sv) (*((uint128_t_a8*)SvPVX(sv)))

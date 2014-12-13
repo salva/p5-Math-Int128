@@ -1,4 +1,3 @@
-
 use Math::Int128 qw(int128 :op);
 use Math::GMPz qw(:mpz);
 use Benchmark qw(:all);
@@ -72,7 +71,7 @@ cmpthese(-2, {
     'add_M::G2' => 'Rmpz_add($mpz_ret, $mpz1, $mpz2)',
 });
 
-die "Error 3:\n$ri\n$mpz_ret\n$i_ret\n" if $ri != int128("$mpz_ret") 
+die "Error 3:\n$ri\n$mpz_ret\n$i_ret\n" if $ri != int128("$mpz_ret")
  || $ri != int128('1060516603104440851094132036041866242') || $ri != $i_ret;
 
 print "
@@ -87,5 +86,5 @@ cmpthese(-2, {
     'sub_M::G2' => 'Rmpz_sub($mpz_ret, $mpz1, $mpz_sub)',
 });
 
-die "Error 4:\n$ri\n$mpz_ret\n$i_ret\n" if $ri != int128("$mpz_ret") 
+die "Error 4:\n$ri\n$mpz_ret\n$i_ret\n" if $ri != int128("$mpz_ret")
  || $ri != int128('457611325781455127825205517363509632') || $ri != $i_ret;

@@ -3,12 +3,15 @@ package Math::Int128;
 use strict;
 use warnings;
 
+# The "our $VERSION" bit needs to be at the beginning of the line for the
+# benefit of the RewriteVersion plugin.
 BEGIN {
-    our $VERSION = '0.16_02';
-
-    require XSLoader;
-    XSLoader::load('Math::Int128', $VERSION);
+our $VERSION = '0.16_03';
+require XSLoader;
+XSLoader::load('Math::Int128', $VERSION);
 }
+
+use Math::Int64 0.34;
 
 use constant MAX_INT128  => string_to_int128 ( '0x7fff_ffff_ffff_ffff_ffff_ffff_ffff_ffff');
 use constant MIN_INT128  => string_to_int128 ('-0x8000_0000_0000_0000_0000_0000_0000_0000');
@@ -150,6 +153,8 @@ use overload ( '+' => \&_add,
 
 __END__
 
+=encoding UTF-8
+
 =head1 NAME
 
 Math::Int128 - Manipulate 128 bits integers in Perl
@@ -226,7 +231,7 @@ a different compiler that also supports 128bit integers get in touch
 with me in order to have it supported.
 
 You can send me bug reports by email to the address that appears below
-or use the CPAN RT bugtracking system available at
+or use the CPAN RT bug tracking system available at
 L<http://rt.cpan.org>.
 
 The source for the development version of the module is hosted at
@@ -245,8 +250,7 @@ L<http://perlmonks.org/?node_id=886488>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007, 2009, 2011-2014 by Salvador FandiE<ntilde>o
-(sfandino@yahoo.com)
+Copyright (C) 2007, 2009, 2011-2014 by Salvador Fandiño (sfandino@yahoo.com)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
