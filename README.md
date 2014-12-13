@@ -74,7 +74,7 @@ a different compiler that also supports 128bit integers get in touch
 with me in order to have it supported.
 
 You can send me bug reports by email to the address that appears below
-or use the CPAN RT bugtracking system available at
+or use the CPAN RT bug tracking system available at
 [http://rt.cpan.org](http://rt.cpan.org).
 
 The source for the development version of the module is hosted at
@@ -93,8 +93,7 @@ Amazon Wish List: [http://amzn.com/w/1WU1P6IR5QZ42](http://amzn.com/w/1WU1P6IR5Q
 
 # COPYRIGHT AND LICENSE
 
-Copyright (C) 2007, 2009, 2011-2014 by Salvador Fandiño
-(sfandino@yahoo.com)
+Copyright (C) 2007, 2009, 2011-2014 by Salvador Fandiño (sfandino@yahoo.com)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
