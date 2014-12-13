@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+
+0.16_03  2014-12-13
       - Removed compiler detection in favor of compiler feature checking with
         Config::AutoConf. (Dave Rolsky)
 
