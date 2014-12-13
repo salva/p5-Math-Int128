@@ -27,13 +27,11 @@ on 'configure' => sub {
 
 on 'develop' => sub {
   requires "Module::CAPIMaker" => "0";
-  requires "Pod::Coverage::TrustPod" => "0";
   requires "Test::CPAN::Changes" => "0.19";
   requires "Test::EOL" => "0";
-  requires "Test::More" => "0.88";
+  requires "Test::More" => "0";
   requires "Test::NoTabs" => "0";
   requires "Test::Pod" => "1.41";
-  requires "Test::Pod::Coverage" => "1.08";
   requires "Test::Spelling" => "0.12";
   requires "Test::Synopsis" => "0";
 };
