@@ -3,6 +3,8 @@ package Math::Int128;
 use strict;
 use warnings;
 
+# The "our $VERSION" bit needs to be at the beginning of the line for the
+# benefit of the RewriteVersion plugin.
 BEGIN {
 our $VERSION = '0.16_02';
 require XSLoader;
