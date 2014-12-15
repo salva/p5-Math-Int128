@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+
+0.16_04  2014-12-15
       - clang on FreeBSD i386 will claim to support 128-bit integers but then
         segfault when compiling this module's XS code. The compiler feature
         checking now uses a more complex test program to ensure that the
