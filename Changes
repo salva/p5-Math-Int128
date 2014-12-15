@@ -1,6 +1,10 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - clang on FreeBSD i386 will claim to support 128-bit integers but then
+        segfault when compiling this module's XS code. The compiler feature
+        checking now uses a more complex test program to ensure that the
+        compiler really does support 128-bit integers.
 
 0.16_03  2014-12-13
       - Removed compiler detection in favor of compiler feature checking with

@@ -98,9 +98,9 @@ sub _int128_define {
     my $autoconf = Config::AutoConf->new;
 
     return unless $autoconf->check_default_headers();
-    return '-D__INT128' if $autoconf->check_type('__int128');
+    return '-D__INT128' if _check_type( $autoconf, '__int128' );
     return '-DINT128_TI'
-        if $autoconf->check_type('int __attribute__ ((__mode__ (TI)))');
+        if _check_type( $autoconf, 'int __attribute__ ((__mode__ (TI)))' );
 
     warn <<'EOF';
 
@@ -111,6 +111,43 @@ sub _int128_define {
 EOF
 
     exit 1;
+}
+
+# This more complex check is needed in order to ferret out bugs with clang on
+# i386 platforms. See http://llvm.org/bugs/show_bug.cgi?id=15834 for the bug
+# report. This appears to be
+sub _check_type {
+    my $autoconf = shift;
+    my $type     = shift;
+
+    my $uint64_type
+        = $autoconf->check_type('uint64_t') ? 'uint64_t'
+        : $autoconf->check_type(
+        'unsigned int __attribute__ ((__mode__ (DI)))')
+        ? 'unsigned int __attribute__ ((__mode__ (DI)))'
+        : return 0;
+
+    my $cache_name = $autoconf->_cache_type_name( 'type', $type );
+    my $check_sub = sub {
+        my $prologue = $autoconf->_default_includes();
+        $prologue .=
+            $type =~ /__mode__/
+            ? "typedef unsigned uint128_t __attribute__((__mode__(TI)));\n"
+            : "typedef unsigned __int128 uint128_t;\n";
+
+        # The rand() calls are there because if we just use constants than the
+        # compiler can optimize most of this code away.
+        my $body = <<"EOF";
+$uint64_type a = (($uint64_type)rand()) * rand();
+$uint64_type b = (($uint64_type)rand()) << 24;
+uint128_t c = ((uint128_t)a) * b;
+return c > rand();
+EOF
+        my $conftest = $autoconf->lang_build_program( $prologue, $body );
+        return $autoconf->compile_if_else($conftest);
+    };
+
+    return $autoconf->check_cached( $cache_name, "for $type", $check_sub );
 }
 
 package MY;
