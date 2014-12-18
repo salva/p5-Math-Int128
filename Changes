@@ -1,7 +1,6 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
-
       - More left and right shift fixes. When shifting left by more than 127
         bits, the return value is always 0. When shifting right by more than
         127 bits, the return value is 0 for numbers >= 0 and -1
