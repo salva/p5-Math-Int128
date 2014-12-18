@@ -224,5 +224,23 @@ for my $i (5..9) {
     cmp_ok($one, '==', 0, '1 >>= 129 == 0');
 }
 
+{
+    my $neg_one = int128(-1);
+    cmp_ok($neg_one >> 128, '==', -1, '-1 >> 128 == -1');
+    cmp_ok($neg_one >> 129, '==', -1, '-1 >> 129 == -1');
+}
+
+{
+    my $neg_one = int128(-1);
+    $neg_one >>= 128;
+    cmp_ok($neg_one, '==', -1, '-1 >>= 128 == -1');
+}
+
+{
+    my $neg_one = int128(-1);
+    $neg_one >>= 129;
+    cmp_ok($neg_one, '==', -1, '-1 >>= 129 == -1');
+}
+
 done_testing();
 
