@@ -1,6 +1,7 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - No changes from the last release.
 
 0.16_05  2014-12-18
       - More left and right shift fixes. When shifting left by more than 127
