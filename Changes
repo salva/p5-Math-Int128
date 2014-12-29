@@ -4,6 +4,9 @@ Revision history for Perl extension Math::Int128.
       - Trying out a slightly different probe for uint128 support. The
         previous version could have (very rarely) returned false when it
         should have returned true.
+      - Made this module compile with the system Perl on OSX by brutally
+        stripping the "-arch i386" flag when running the compiler. Your
+        results may vary (but it passes its tests).
 
 0.17     2014-12-23
       - No changes from the last release.
