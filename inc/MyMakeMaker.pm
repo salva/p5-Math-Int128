@@ -59,7 +59,7 @@ sub _check_for_capi_maker {
     unless ( eval { require Module::CAPIMaker; 1; } ) {
         warn <<'EOF';
 
-  It looks like you're trying to build Math::Int64 from the git repo. You'll
+  It looks like you're trying to build Math::Int128 from the git repo. You'll
   need to install Module::CAPIMaker from CPAN in order to do this.
 
 EOF
