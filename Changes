@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+
+0.17_01  2014-12-29
       - Trying out a slightly different probe for uint128 support. The
         previous version could have (very rarely) returned false when it
         should have returned true.
