@@ -26,7 +26,8 @@ override _build_WriteMakefile_dump => sub {
 
     my $dump = super();
     $dump .= <<'EOF';
-$WriteMakefileArgs{DEFINE} = _int128_define();
+$WriteMakefileArgs{DEFINE}  = _int128_define();
+$WriteMakefileArgs{CCFLAGS} = _ccflags( $WriteMakefileArgs{CCFLAGS} );
 EOF
 
     return $dump;
@@ -120,6 +121,15 @@ EOF
     };
 
     return $autoconf->check_cached( $cache_name, "for $type", $check_sub );
+}
+
+sub _ccflags {
+    my $flags = shift;
+
+    return $flags unless -d '.git';
+
+    return join q{ }, ( $flags || q{} ),
+        qw( -Wall -Wdeclaration-after-statement );
 }
 
 package MY;
