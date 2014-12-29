@@ -50,6 +50,8 @@ __PACKAGE__->meta()->make_immutable();
 
 __DATA__
 
+use Config qw( %Config );
+
 use lib 'inc';
 use Config::AutoConf;
 
@@ -125,6 +127,15 @@ EOF
 
 sub _ccflags {
     my $flags = shift;
+
+    my $config_flags = $Config{ccflags};
+    if ($config_flags) {
+        $config_flags =~ s/ ?-arch i386//
+            if $config_flags =~ /-arch x86_64/
+            && $config_flags =~ /-arch i386/;
+    }
+
+    $flags = join q{ }, grep { defined && length } $flags, $config_flags;
 
     return $flags unless -d '.git';
 
