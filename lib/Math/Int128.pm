@@ -6,7 +6,7 @@ use warnings;
 # The "our $VERSION" bit needs to be at the beginning of the line for the
 # benefit of the RewriteVersion plugin.
 BEGIN {
-our $VERSION = '0.17_01';
+our $VERSION = '0.17_02';
 require XSLoader;
 XSLoader::load('Math::Int128', $VERSION);
 }

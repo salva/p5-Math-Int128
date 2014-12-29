@@ -3,7 +3,7 @@ package Math::Int128::die_on_overflow;
 use strict;
 use warnings;
 
-our $VERSION = '0.17_01';
+our $VERSION = '0.17_02';
 
 sub import {
     require Math::Int128;
