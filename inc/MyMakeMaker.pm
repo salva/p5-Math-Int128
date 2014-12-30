@@ -11,7 +11,6 @@ override _build_WriteMakefile_args => sub {
     my $self = shift;
 
     my $args = super();
-
     # This makes it build the perl_math_int64.c file into a .o and then link
     # it with Int128.o
     $args->{OBJECT} = '$(O_FILES)';
@@ -93,8 +92,8 @@ EOF
 # i386 platforms. See http://llvm.org/bugs/show_bug.cgi?id=15834 for the bug
 # report. This appears to be
 sub _check_type {
-    my $autoconf     = shift;
-    my $uint128_type = shift;
+    my $autoconf = shift;
+    my $type     = shift;
 
     my $uint64_type
         = $autoconf->check_type('uint64_t') ? 'uint64_t'
@@ -103,26 +102,27 @@ sub _check_type {
         ? 'unsigned int __attribute__ ((__mode__ (DI)))'
         : return 0;
 
-    my $cache_name = $autoconf->_cache_type_name( 'type', $uint128_type );
+    my $cache_name = $autoconf->_cache_type_name( 'type', $type );
     my $check_sub = sub {
         my $prologue = $autoconf->_default_includes();
+        $prologue .=
+            $type =~ /__mode__/
+            ? "typedef unsigned uint128_t __attribute__((__mode__(TI)));\n"
+            : "typedef unsigned __int128 uint128_t;\n";
 
+        # The rand() calls are there because if we just use constants than the
+        # compiler can optimize most of this code away.
         my $body = <<"EOF";
-volatile $uint64_type a = (($uint64_type)3) * 4;
-volatile $uint64_type b = (($uint64_type)5) << 24;
-volatile $uint128_type c = (($uint128_type)a) * b;
-return c > 0;
+$uint64_type a = (($uint64_type)rand()) * rand();
+$uint64_type b = (($uint64_type)rand()) << 24;
+uint128_t c = ((uint128_t)a) * b;
+return c > rand();
 EOF
-
         my $conftest = $autoconf->lang_build_program( $prologue, $body );
         return $autoconf->compile_if_else($conftest);
     };
 
-    return $autoconf->check_cached(
-        $cache_name,
-        "for $uint128_type",
-        $check_sub
-    );
+    return $autoconf->check_cached( $cache_name, "for $type", $check_sub );
 }
 
 sub _ccflags {

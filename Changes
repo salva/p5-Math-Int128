@@ -1,6 +1,9 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - Reverted the probe change in the last version. This wasn't necessary
+        and it brought back the old failure of clang on FreeBSD i386 claiming
+        it supported int128 values when it really didn't.
 
 0.17_01  2014-12-29
       - Trying out a slightly different probe for uint128 support. The
