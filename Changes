@@ -1,6 +1,7 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - No changes from last release.
 
 0.17_02  2014-12-30
       - Reverted the probe change in the last version. This wasn't necessary
