@@ -18,19 +18,20 @@ Perl.
 
 In order to compile this module, your compiler must support one of either the
 `__int128` or `int __attribute__ ((__mode__ (TI)))` types. Both GCC and
-Clang support have support one or the other type for some time, but may only
-do so on 64-bit platforms.
+Clang have supported one or the other type for some time, but they may only do
+so on 64-bit platforms.
 
 ## OSX Caveat
 
 On OSX, the system Perl is compiled with both the "-arch x86\_64" and "-arch
-i386" flags. We strip the "-arch i386" bit before building this module,
-meaning it is only compiled for the 64-bit architecture. Attempting to use
-this module while running in 32-bit mode may lead to brokenness. It's also
-possible that this will cause other problems that we cannot foresee.
+i386" flags. When building this module with a Perl like this, we strip the
+"-arch i386" flag out, meaning it is only compiled for the 64-bit
+architecture. Attempting to use this module while running in 32-bit mode may
+lead to brokenness. It's also possible that this will cause other problems
+that we cannot foresee.
 
-Note that if you compile this module against a non-multiarch Perl you build
-yourself then this will not be an issue.
+Note that if you have built your own non-multiarch Perl on OSX then this will
+not be an issue.
 
 # API
 
