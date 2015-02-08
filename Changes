@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - Fix bug #101982: infinite loop in string_to_uint128 (reported
+        by Matt Sisk).
 
 0.18     2015-01-05
       - No changes from last release.
