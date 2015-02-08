@@ -34,7 +34,7 @@ typedef uint128_t uint128_t_a8 __attribute__ ((aligned(8)));
 
 #define INT128_MAX ((int128_t)((~(uint128_t)0)>>1))
 #define INT128_MIN (~INT128_MAX)
-#define UINT128_MAX (~(int128_t)0)
+#define UINT128_MAX ((uint128_t)(~(uint128_t)0))
 
 static int may_die_on_overflow = 0;
 
@@ -222,6 +222,8 @@ SvSU128(pTHX_ SV *sv) {
 
 static int128_t
 SvI128(pTHX_ SV *sv) {
+    STRLEN len;
+    char *pv;
     if (SvROK(sv)) {
         SV *si128 = SvRV(sv);
         if (si128 && SvOBJECT(si128)) {
@@ -313,11 +315,14 @@ SvI128(pTHX_ SV *sv) {
             return nv;
         }
     }
-    return strtoint128(aTHX_ SvPV_nolen(sv), 10, 1);
+    pv = SvPV(sv, len);
+    return strtoint128(aTHX_ pv, len, 10, 1);
 }
 
 static uint128_t
 SvU128(pTHX_ SV *sv) {
+    STRLEN len;
+    char *pv;
     if (SvROK(sv)) {
         SV *su128 = SvRV(sv);
         if (su128 && SvOBJECT(su128)) {
@@ -415,7 +420,8 @@ SvU128(pTHX_ SV *sv) {
             return nv;
         }
     }
-    return strtoint128(aTHX_ SvPV_nolen(sv), 10, 0);
+    pv = SvPV(sv, len);
+    return strtoint128(aTHX_ pv, len, 10, 0);
 }
 
 static SV *
@@ -776,20 +782,28 @@ OUTPUT:
     RETVAL
 
 SV *
-miu128_string_to_int128(str, base = 0)
-    const char *str;
+miu128_string_to_int128(sv, base = 0)
+    SV *sv
     int base;
+PREINIT:
+    const char *pv;
+    STRLEN len;
 CODE:
-    RETVAL = newSVi128(aTHX_ strtoint128(aTHX_ str, base, 1));
+    pv = SvPV(sv, len);
+    RETVAL = newSVi128(aTHX_ strtoint128(aTHX_ pv, len, base, 1));
 OUTPUT:
     RETVAL
 
 SV *
-miu128_string_to_uint128(str, base = 0)
-    const char *str;
-    int base;
+miu128_string_to_uint128(sv, base = 0)
+    SV *sv
+    int base
+PREINIT:
+    const char *pv;
+    STRLEN len;
 CODE:
-    RETVAL = newSVu128(aTHX_ strtoint128(aTHX_ str, base, 0));
+    pv = SvPV(sv, len);
+    RETVAL = newSVu128(aTHX_ strtoint128(aTHX_ pv, len, base, 0));
 OUTPUT:
     RETVAL
 

@@ -33,6 +33,7 @@
  * SUCH DAMAGE.
  */
 
+#include "perl.h"
 #include <ctype.h>
 
 /*
@@ -40,10 +41,10 @@
  */
 
 static uint128_t
-strtoint128(pTHX_ const char *s, int base, int sign) {
+strtoint128(pTHX_ const char *s, STRLEN len, int base, int sign) {
     uint128_t acc = 0;
     int c, neg, between = 0;
-    
+    const char *top = s + len;
     uint128_t upper_mul_limit = 0;
 
     /*
@@ -52,27 +53,33 @@ strtoint128(pTHX_ const char *s, int base, int sign) {
      * assume decimal; if base is already 16, allow 0x.
      */
     do {
-        c = (unsigned char) *s++;
-    } while (isspace(c));
+        if (s >= top) return 0;
+        c = *s++;
+    } while isspace(c);
+
     if (c == '-') {
+        if (!sign) overflow(aTHX_ "negative sign found when parsing unsigned number");
+        if (s >= top) return 0;
         neg = 1;
         c = *s++;
-        if (!sign) overflow(aTHX_ "negative sign found when parsing unsigned number");
     } else {
         neg = 0;
-        if (c == '+')
+        if (c == '+') {
+            if (s >= top) return 0;
             c = *s++;
+        }
     }
-    if ((base == 0 || base == 16) &&
-        c == '0' && (*s == 'x' || *s == 'X')) {
+    if (((base == 0) || (base == 16)) &&
+        (c == '0') &&
+        (s + 1 < top) && ((*s == 'x') || (*s == 'X'))) {
         c = s[1];
         s += 2;
         base = 16;
     }
     if (base == 0)
-        base = c == '0' ? 8 : 10;
-    
-    for (;; c = (unsigned char) *s++) {
+        base = ((c == '0') ? 8 : 10);
+
+    for (;s <= top; c = (unsigned char) *s++) {
         if (isdigit(c))
             c -= '0';
         else if (isalpha(c))
@@ -103,7 +110,7 @@ strtoint128(pTHX_ const char *s, int base, int sign) {
     }
     if ( may_die_on_overflow && sign &&
          ( acc > (neg ? (~(uint128_t)INT128_MIN + 1) : INT128_MAX) ) ) overflow(aTHX_ out_of_bounds_error_s);
-    
+
     return (neg ? ~acc + 1 : acc);
 }
 
