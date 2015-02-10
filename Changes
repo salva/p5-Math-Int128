@@ -1,6 +1,7 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - Fix syntax error masked by some isspace macro implementations.
 
 0.19     2015-02-08
       - Fix bug #101982: infinite loop in string_to_uint128 (reported

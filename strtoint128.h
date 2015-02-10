@@ -55,7 +55,7 @@ strtoint128(pTHX_ const char *s, STRLEN len, int base, int sign) {
     do {
         if (s >= top) return 0;
         c = *s++;
-    } while isspace(c);
+    } while (isspace(c));
 
     if (c == '-') {
         if (!sign) overflow(aTHX_ "negative sign found when parsing unsigned number");
