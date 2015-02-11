@@ -171,10 +171,12 @@ for my $j (0..126) {
     my $pow2j = slow_pow_nv(2, $j);
 
     is(uint128($pow2j), uint128(2)**$j, "int128 pow and NV to int128 conversion");
-    is($max >> $j, $max / $pow2j, "max int128 >> $j")
-        or diag '$max >> $j = ' . ($max >> $j) . ', $max / 2 ** $j = ' . ($max / $pow2j) .
+    is($max >> $j, $max / $pow2j, "max int128 >> $j") or
+        diag '$max >> $j = ' . ($max >> $j) . ', $max / 2 ** $j = ' . ($max / $pow2j) .
             ", \$max = $max, \$j = $j, 2 ** \$j = " . sprintf("%f", $pow2j) .
                 ", int128(2 ** \$j) = " . int128($pow2j);
+    ok (not($max / $pow2j == 1 and 2 * $pow2j < $max), "Strawberry 5.16.x bug") or
+        diag "This is a known bug happening in old versions of Strawberry Perl. Upgrade!!!";
 
     my $copy = int128($max);
     $copy >>= $j;
