@@ -175,8 +175,8 @@ for my $j (0..126) {
         diag '$max >> $j = ' . ($max >> $j) . ', $max / 2 ** $j = ' . ($max / $pow2j) .
             ", \$max = $max, \$j = $j, 2 ** \$j = " . sprintf("%f", $pow2j) .
                 ", int128(2 ** \$j) = " . int128($pow2j);
-    ok (not($max / $pow2j == 1 and 2 * $pow2j < $max), "Strawberry 5.16.x bug") or
-        diag "This is a known bug happening in old versions of Strawberry Perl. Upgrade!!!";
+    ok (not($max / $pow2j == 1 and 2 * $pow2j < int128_to_number($max)), "Strawberry 5.16.x bug") or
+        diag "This is a known bug happening in old versions of Strawberry Perl. Upgrade!!! (max: $max, pow2j: $pow2j)";
 
     my $copy = int128($max);
     $copy >>= $j;
