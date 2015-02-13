@@ -11,7 +11,7 @@ use ExtUtils::MakeMaker;
 
 my %WriteMakefileArgs = (
   "ABSTRACT" => "Manipulate 128 bits integers in Perl",
-  "AUTHOR" => "Salvador Fandi\x{f1}o <sfandino\@yahoo.com>, Dave Rolsky <autarch\@urth.org>",
+  "AUTHOR" => "Salvador Fandino <sfandino\@yahoo.com>, Dave Rolsky <autarch\@urth.org>",
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => 0
   },
@@ -165,10 +165,7 @@ sub _ccflags {
 
     $flags = join q{ }, grep { defined && length } $flags, $config_flags;
 
-    return $flags unless -d '.git';
-
-    return join q{ }, ( $flags || q{} ),
-        qw( -Wall -Wdeclaration-after-statement );
+    $flags
 }
 
 package MY;
