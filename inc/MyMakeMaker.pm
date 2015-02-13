@@ -137,10 +137,7 @@ sub _ccflags {
 
     $flags = join q{ }, grep { defined && length } $flags, $config_flags;
 
-    return $flags unless -d '.git';
-
-    return join q{ }, ( $flags || q{} ),
-        qw( -Wall -Wdeclaration-after-statement );
+    $flags
 }
 
 package MY;
