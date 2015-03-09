@@ -16,8 +16,9 @@
 /perl_math_int128.o
 /perl_math_int64.o
 /pm_to_blib
-perlcriticrc
-perltidyrc
-tidyall.ini
-dll.*
+/perlcriticrc
+/perltidyrc
+/tidyall.ini
+/dll.*
 *~
+/.tidyall*
