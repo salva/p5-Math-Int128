@@ -1,5 +1,5 @@
 requires "Exporter" => "0";
-requires "Math::Int64" => "0.34";
+requires "Math::Int64" => "0.51";
 requires "XSLoader" => "0";
 requires "constant" => "0";
 requires "overload" => "0";
@@ -12,7 +12,7 @@ on 'test' => sub {
   requires "IO::Handle" => "0";
   requires "IPC::Open3" => "0";
   requires "Math::BigInt" => "0";
-  requires "Test::More" => "0.88";
+  requires "Test::More" => "0.96";
   requires "integer" => "0";
   requires "perl" => "5.006";
 };
@@ -27,6 +27,8 @@ on 'configure' => sub {
 
 on 'develop' => sub {
   requires "Module::CAPIMaker" => "0";
+  requires "Perl::Critic" => "1.123";
+  requires "Perl::Tidy" => "20140711";
   requires "Test::CPAN::Changes" => "0.19";
   requires "Test::EOL" => "0";
   requires "Test::More" => "0.88";
