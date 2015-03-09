@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - Remove obsolete compiler checks from C API files (bug report
+        and analysis by Matt Sisk)
 
 0.20     2015-02-10
       - Fix syntax error masked by some isspace macro implementations.
