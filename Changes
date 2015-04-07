@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+
+0.22     2015-04-07
       - Fix for #RT103359: CLONE hook was dying because its signature
         was wrong (bug report by Duke Smith)
 
