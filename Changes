@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Int128.
 
 {{$NEXT}}
+      - Fix for #RT103359: CLONE hook was dying because its signature
+        was wrong (bug report by Duke Smith)
 
 0.21     2015-03-09
       - Remove obsolete compiler checks from C API files (bug report

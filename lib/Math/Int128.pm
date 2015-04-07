@@ -6,7 +6,7 @@ use warnings;
 # The "our $VERSION" bit needs to be at the beginning of the line for the
 # benefit of the RewriteVersion plugin.
 BEGIN {
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 require XSLoader;
 XSLoader::load('Math::Int128', $VERSION);
 }
@@ -265,9 +265,9 @@ L<http://perlmonks.org/?node_id=886488>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright E<copy> 2007, 2009, 2011-2014 by Salvador Fandiño (sfandino@yahoo.com)
+Copyright E<copy> 2007, 2009, 2011-2015 by Salvador Fandiño (sfandino@yahoo.com)
 
-Copyright E<copy> 2014 by Dave Rolsky
+Copyright E<copy> 2014-2015 by Dave Rolsky
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
