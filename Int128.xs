@@ -554,10 +554,13 @@ BOOT:
     PERL_MATH_INT64_LOAD_OR_CROAK;
     INIT_C_API;
 
-void
-CLONE()
+int
+CLONE(...)
 CODE:
     init_stash_cache(aTHX);
+    RETVAL = 1;
+OUTPUT:
+    RETVAL
 
 void
 miu128__set_may_die_on_overflow(v)
