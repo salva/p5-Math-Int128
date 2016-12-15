@@ -2,7 +2,7 @@
 
 
 SV *     newSVi128 (pTHX_ int128_t i128)
-SV *     newSVu128 (pTHX_ uint128_t u128) 
+SV *     newSVu128 (pTHX_ uint128_t u128)
 int128_t SvI128    (pTHX_ SV *sv)
 int128_t SvU128    (pTHX_ SV *sv)
 int      SvI128OK  (pTHX_ SV*)

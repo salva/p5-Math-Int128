@@ -547,7 +547,7 @@ powU128(pTHX_ uint128_t a, uint128_t b) {
 
 #include "c_api.h"
 
-MODULE = Math::Int128		PACKAGE = Math::Int128			PREFIX=miu128_	
+MODULE = Math::Int128		PACKAGE = Math::Int128			PREFIX=miu128_
 
 BOOT:
     init_stash_cache(aTHX);
@@ -852,7 +852,7 @@ CODE:
          ( a > 0
            ? ( (b > 0) && (INT128_MAX - a < b) )
            : ( (b < 0) && (INT128_MIN - a > b) ) ) ) overflow(aTHX_ add_error);
-    if (SvOK(rev)) 
+    if (SvOK(rev))
         RETVAL = newSVi128(aTHX_ a + b);
     else {
         RETVAL = self;
@@ -1240,7 +1240,7 @@ mi128_bnot(self, ...)
 CODE:
     RETVAL = newSVi128(aTHX_ ~SvI128x(self));
 OUTPUT:
-    RETVAL    
+    RETVAL
 
 SV *
 mi128_neg(self, ...)
@@ -1318,7 +1318,7 @@ PREINIT:
     uint128_t b = SvU128(aTHX_ other);
 CODE:
     if (may_die_on_overflow && (UINT128_MAX - a < b)) overflow(aTHX_ add_error);
-    if (SvOK(rev)) 
+    if (SvOK(rev))
         RETVAL = newSVu128(aTHX_ a + b);
     else {
         RETVAL = self;
@@ -1674,7 +1674,7 @@ mu128_bnot(self, ...)
 CODE:
     RETVAL = newSVu128(aTHX_ ~SvU128x(self));
 OUTPUT:
-    RETVAL    
+    RETVAL
 
 SV *
 mu128_neg(self, ...)
@@ -1907,7 +1907,7 @@ mi128_int128_right(self, a, b)
     uint128_t b
 CODE:
     SvI128x(self) = (b > 127 ? (a < 0 ? - 1 : 0) : a >> b);
-                  
+
 void
 mi128_int128_average(self, a, b)
     SV *self

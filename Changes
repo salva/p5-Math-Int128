@@ -122,8 +122,8 @@ Revision history for Perl extension Math::Int128.
 
 0.06_03  2012-01-11
       - add die_on_overflow feature
-      - add support for int64_t integers via Math::Int64 
-      
+      - add support for int64_t integers via Math::Int64
+
 0.05     2011-04-24
       - support for gcc 4.4 and 4.5 contributed by KMX
 
