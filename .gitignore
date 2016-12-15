@@ -22,3 +22,7 @@
 /dll.*
 *~
 /.tidyall*
+/*.gcov
+/*.gcno
+/*.gcda
+/cover_db
