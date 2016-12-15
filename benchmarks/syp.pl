@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 use Math::Int128 qw(int128 :op);
 use Math::GMPz qw(:mpz);
 use Benchmark qw(:all);
