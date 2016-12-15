@@ -41,7 +41,7 @@ L<Math::Int128>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright E<copy> 2011, 2013 by Salvador Fandiño (sfandino@yahoo.com)
+Copyright E<copy> 2011, 2013-2015 by Salvador Fandiño (sfandino@yahoo.com)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
