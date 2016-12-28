@@ -14,9 +14,10 @@ with 'Dist::Zilla::Role::FileGatherer',
 sub gather_files {
     my $self = shift;
 
+    (my $module_name = $self->zilla->name) =~ s/-/::/g;
     my @cmd = (
         'make_perl_module_c_api',
-        'module_name=' . ( $self->zilla->name =~ s/-/::/gr ),
+        'module_name=' . $module_name,
         'module_version=' . $self->zilla->version,
         q{author="} . ( join ', ', @{ $self->zilla->authors } ) . q{"},
     );
