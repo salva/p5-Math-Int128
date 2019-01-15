@@ -226,7 +226,7 @@ C<int128_divmod> returns both the result of the division and the remainder:
 
 =head1 C API
 
-The module provides a C API that allows to wrap/unwrap int128_t and
+The module provides a C API that allows one to wrap/unwrap int128_t and
 uint128_t values from other modules written in C/XS.
 
 It is identical to that provided by L<Math::Int64> so read the
