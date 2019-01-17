@@ -11,7 +11,7 @@ use ExtUtils::MakeMaker;
 
 my %WriteMakefileArgs = (
   "ABSTRACT" => "Manipulate 128 bits integers in Perl",
-  "AUTHOR" => "Salvador Fandino <sfandino\@yahoo.com>, Dave Rolsky <autarch\@urth.org>",
+  "AUTHOR" => "Salvador Fandi\x{f1}o <sfandino\@yahoo.com>, Dave Rolsky <autarch\@urth.org>",
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => 0
   },
