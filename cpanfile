@@ -3,6 +3,7 @@ requires "Math::Int64" => "0.51";
 requires "XSLoader" => "0";
 requires "constant" => "0";
 requires "overload" => "0";
+requires "perl" => "5.010";
 requires "strict" => "0";
 requires "warnings" => "0";
 
@@ -14,7 +15,6 @@ on 'test' => sub {
   requires "Math::BigInt" => "0";
   requires "Test::More" => "0.96";
   requires "integer" => "0";
-  requires "perl" => "5.006";
 };
 
 on 'test' => sub {
